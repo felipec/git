@@ -714,6 +714,11 @@ def do_export(parser):
     if peer:
         parser.repo.push(peer, force=False)
 
+def check_output(cmd):
+    if sys.version_info[0:2] >= (2,7):
+        return subprocess.check_output(cmd)
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+
 def main(args):
     global prefix, dirname, branches, bmarks
     global marks, blob_marks, parsed_refs
@@ -728,11 +733,11 @@ def main(args):
     track_branches = True
     try:
         cmd = ['git', 'config', '--get', 'remote-hg.hg-git-compat']
-        if subprocess.check_output(cmd) == 'true\n':
+        if check_output(cmd) == 'true\n':
             hg_git_compat = True
             track_branches = False
         cmd = ['git', 'config', '--get', 'remote-hg.track-branches']
-        if subprocess.check_output(cmd) == 'false\n':
+        if check_output(cmd) == 'false\n':
             track_branches = False
     except subprocess.CalledProcessError:
         pass
