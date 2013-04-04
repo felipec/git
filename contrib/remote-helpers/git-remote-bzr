@@ -191,7 +191,13 @@ def get_filechanges(cur, prev):
         modified[path] = fid
     for oldpath, newpath, fid, kind, mod, _ in changes.renamed:
         removed[oldpath] = None
-        modified[newpath] = fid
+        if kind == 'directory':
+            lst = cur.list_files(from_dir=newpath, recursive=True)
+            for path, file_class, kind, fid, entry in lst:
+                if kind != 'directory':
+                    modified[newpath + '/' + path] = fid
+        else:
+            modified[newpath] = fid
 
     return modified, removed
 
@@ -217,7 +223,7 @@ def export_files(tree, files):
             # is the blog already exported?
             if h in filenodes:
                 mark = filenodes[h]
-                final.append((mode, mark, path))
+                final.append((mode, mark, path.encode('utf-8')))
                 continue
 
             d = tree.get_file_text(fid)
@@ -234,7 +240,7 @@ def export_files(tree, files):
         print "data %d" % len(d)
         print d
 
-        final.append((mode, mark, path))
+        final.append((mode, mark, path.encode('utf-8')))
 
     return final
 
@@ -260,7 +266,12 @@ def export_branch(branch, name):
         tz = rev.timezone
         committer = rev.committer.encode('utf-8')
         committer = "%s %u %s" % (fixup_user(committer), time, gittz(tz))
-        author = committer
+        authors = rev.get_apparent_authors()
+        if authors:
+            author = authors[0].encode('utf-8')
+            author = "%s %u %s" % (fixup_user(author), time, gittz(tz))
+        else:
+            author = committer
         msg = rev.message.encode('utf-8')
 
         msg += '\n'
@@ -297,10 +308,10 @@ def export_branch(branch, name):
             else:
                 print "merge :%s" % m
 
+        for f in removed:
+            print "D %s" % (f,)
         for f in modified_final:
             print "M %s :%u %s" % f
-        for f in removed:
-            print "D %s" % (f)
         print
 
         count += 1
@@ -619,10 +630,9 @@ def do_export(parser):
                     peer.import_last_revision_info_and_tags(repo, revno, revid)
                 else:
                     peer.import_last_revision_info(repo.repository, revno, revid)
-                wt = peer.bzrdir.open_workingtree()
             else:
                 wt = repo.bzrdir.open_workingtree()
-            wt.update()
+                wt.update()
         print "ok %s" % ref
     print
 
@@ -644,7 +654,11 @@ def do_capabilities(parser):
 def do_list(parser):
     global tags
     print "? refs/heads/%s" % 'master'
+
+    history = parser.repo.revision_history()
     for tag, revid in parser.repo.tags.get_tag_dict().items():
+        if revid not in history:
+            continue
         print "? refs/tags/%s" % tag
         tags[tag] = revid
     print "@refs/heads/%s HEAD" % 'master'
