@@ -176,7 +176,16 @@ test_expect_success 'fetch utf-8 filenames' '
   cd bzrrepo &&
 
   echo test >> "áéíóú" &&
+  echo test >> "îø∫∆" &&
   bzr add "áéíóú" &&
+  bzr add "îø∫∆" &&
+  bzr commit -m utf-8 &&
+  echo test >> "áéíóú" &&
+  bzr commit -m utf-8 &&
+  bzr rm "îø∫∆" &&
+  bzr mv "áéíóú" "åß∂" &&
+  echo test >> "ƒ®éï" &&
+  bzr add "ƒ®éï" &&
   bzr commit -m utf-8
   ) &&
 
@@ -186,7 +195,8 @@ test_expect_success 'fetch utf-8 filenames' '
   git ls-files > ../actual
   ) &&
 
-  echo "\"\\303\\241\\303\\251\\303\\255\\303\\263\\303\\272\"" > expected &&
+  echo "\"\\303\\245\\303\\237\\342\\210\\202\"" > expected &&
+  echo "\"\\306\\222\\302\\256\\303\\251\\303\\257\"" >> expected &&
   test_cmp expected actual
 '
 
