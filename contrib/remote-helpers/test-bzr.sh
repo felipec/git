@@ -176,8 +176,13 @@ test_expect_success 'fetch utf-8 filenames' '
   cd bzrrepo &&
 
   echo test >> "áéíóú" &&
+  echo test >> "îø∫∆" &&
   bzr add "áéíóú" &&
+  bzr add "îø∫∆" &&
   bzr commit -m utf-8 &&
+  echo test >> "áéíóú" &&
+  bzr commit -m utf-8 &&
+  bzr rm "îø∫∆" &&
   bzr mv "áéíóú" "åß∂" &&
   bzr commit -m utf-8
   ) &&
