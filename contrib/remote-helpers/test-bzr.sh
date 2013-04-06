@@ -184,6 +184,8 @@ test_expect_success 'fetch utf-8 filenames' '
   bzr commit -m utf-8 &&
   bzr rm "îø∫∆" &&
   bzr mv "áéíóú" "åß∂" &&
+  echo test >> "ƒ®éï" &&
+  bzr add "ƒ®éï" &&
   bzr commit -m utf-8
   ) &&
 
@@ -194,6 +196,7 @@ test_expect_success 'fetch utf-8 filenames' '
   ) &&
 
   echo "\"\\303\\245\\303\\237\\342\\210\\202\"" > expected &&
+  echo "\"\\306\\222\\302\\256\\303\\251\\303\\257\"" >> expected &&
   test_cmp expected actual
 '
 
