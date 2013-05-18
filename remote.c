@@ -538,9 +538,14 @@ static const char *remotes_remote_for_branch(struct remote_state *remote_state,
 					     int *explicit)
 {
 	if (branch && branch->remote_name) {
-		if (explicit)
-			*explicit = 1;
-		return branch->remote_name;
+		int invalid = 0;
+		if (fetch_default == FETCH_DEFAULT_SANE)
+			invalid = !strcmp(branch->remote_name, ".");
+		if (!invalid) {
+			if (explicit)
+				*explicit = 1;
+			return branch->remote_name;
+		}
 	}
 	if (explicit)
 		*explicit = 0;
