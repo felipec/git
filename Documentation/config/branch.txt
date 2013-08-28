@@ -103,8 +103,8 @@ branch.<name>.updateMode::
 
 branch.<name>.pullMode::
 	When `git pull` is run, this determines the mode of operation,
-	possible values are 'merge' and 'rebase'. See `pull.mode` for doing this
-	in a non branch-specific manner.
+	possible values are 'fast-forward', 'merge', and 'rebase'.
+	See `pull.mode` for doing this in a non branch-specific manner.
 
 branch.<name>.description::
 	Branch description, can be edited with

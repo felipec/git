@@ -875,4 +875,48 @@ test_expect_success 'git pull --rebase against local branch' '
 	test_cmp expect file2
 '
 
+setup_other () {
+	test_when_finished "git checkout main && git branch -D other test" &&
+	git checkout -b other $1 &&
+	>new &&
+	git add new &&
+	git commit -m new &&
+	git checkout -b test -t other &&
+	git reset --hard main
+}
+
+setup_ff () {
+	setup_other main
+}
+
+setup_non_ff () {
+	setup_other main^
+}
+
+test_expect_success 'fast-forward (pull.mode=fast-forward)' '
+	setup_ff &&
+	git -c pull.mode=fast-forward pull
+'
+
+test_expect_success 'non-fast-forward (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	test_must_fail git -c pull.mode=fast-forward pull
+'
+
+test_expect_success 'non-fast-forward with merge (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	git -c pull.mode=fast-forward pull --merge
+'
+
+test_expect_success 'non-fast-forward with rebase (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	git -c pull.mode=fast-forward pull --rebase
+'
+
+test_expect_success 'non-fast-forward error message (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	test_must_fail git -c pull.mode=fast-forward pull 2> error &&
+	test_i18ngrep "The pull was not fast-forward" error
+'
+
 test_done

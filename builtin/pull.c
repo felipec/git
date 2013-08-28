@@ -979,7 +979,7 @@ static void show_advice_pull_non_ff(void)
 		 "\n"
 		 "  git config pull.mode merge  # the default strategy\n"
 		 "  git config pull.mode rebase\n"
-		 "  git config pull.ff only     # fast-forward only\n"
+		 "  git config pull.mode fast-forward\n"
 		 "\n"
 		 "You can replace \"git config\" with \"git config --global\" to set a default\n"
 		 "preference for all repositories. You can also pass --rebase, --merge,\n"
@@ -1023,6 +1023,7 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 
 		switch (mode) {
 		case PULL_MODE_MERGE:
+		case PULL_MODE_FAST_FORWARD:
 			opt_rebase = REBASE_FALSE;
 			break;
 		case PULL_MODE_REBASE:
@@ -1112,6 +1113,9 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 		die(_("Cannot rebase onto multiple branches."));
 
 	can_ff = get_can_ff(&orig_head, &merge_heads.oid[0]);
+
+	if (mode == PULL_MODE_FAST_FORWARD && !can_ff)
+		die(_("The pull was not fast-forward, either merge or rebase.\n"));
 
 	if (!opt_rebase && !can_ff) {
 		if (opt_verbosity >= 0)

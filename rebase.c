@@ -40,6 +40,8 @@ enum pull_mode_type pull_mode_parse_value(const char *value)
 		return PULL_MODE_MERGE;
 	else if (!strcmp(value, "rebase") || !strcmp(value, "r"))
 		return PULL_MODE_REBASE;
+	else if (!strcmp(value, "fast-forward") || !strcmp(value, "f"))
+		return PULL_MODE_FAST_FORWARD;
 
 	return PULL_MODE_INVALID;
 }

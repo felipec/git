@@ -17,7 +17,8 @@ enum pull_mode_type {
 	PULL_MODE_INVALID = -1,
 	PULL_MODE_DEFAULT = 0,
 	PULL_MODE_MERGE,
-	PULL_MODE_REBASE
+	PULL_MODE_REBASE,
+	PULL_MODE_FAST_FORWARD
 };
 
 enum pull_mode_type pull_mode_parse_value(const char *value);
