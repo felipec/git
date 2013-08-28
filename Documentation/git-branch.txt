@@ -191,8 +191,8 @@ This option is only applicable in non-verbose mode.
 --verbose::
 	When in list mode,
 	show sha1 and commit subject line for each head, along with
-	relationship to upstream branch (if any). If given twice, print
-	the path of the linked worktree (if any) and the name of the upstream
+	the upstream branch (if any). If given twice, print
+	the path of the linked worktree (if any) and the relationship to the upstream
 	branch, as well (see also `git remote show <remote>`).  Note that the
 	current worktree's HEAD will not have its path printed (it will always
 	be your current directory).
@@ -218,7 +218,7 @@ This option is only applicable in non-verbose mode.
 	`branch.<name>.merge` configuration entries to set "upstream" tracking
 	configuration for the new branch. This
 	configuration will tell git to show the relationship between the
-	two branches in `git status` and `git branch -v`. Furthermore,
+	two branches in `git status` and `git branch -vv`. Furthermore,
 	it directs `git pull` without arguments to pull from the
 	upstream when the new branch is checked out.
 +

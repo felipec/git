@@ -258,7 +258,7 @@ test_expect_success 'branch --merged with --verbose' '
 	git branch --verbose --merged topic >actual &&
 	cat >expect <<-EOF &&
 	  main  $(git rev-parse --short main) second on main
-	* topic $(git rev-parse --short topic ) [ahead 1] foo
+	* topic $(git rev-parse --short topic ) [main] foo
 	  zzz   $(git rev-parse --short zzz   ) second on main
 	EOF
 	test_cmp expect actual
