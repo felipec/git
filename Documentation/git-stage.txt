@@ -12,6 +12,7 @@ SYNOPSIS
 'git stage' (-a | --add) [options] [--] [<pathspec>...]
 'git stage' (-r | --remove) [options] [--] [<pathspec>...]
 'git stage' (-d | --diff) [options] [<commit>] [--] [<pathspec>...]
+'git stage' (-e | --edit)
 
 DESCRIPTION
 -----------
@@ -35,6 +36,10 @@ OPTIONS
 -d::
 --diff::
 	View the changes staged for the next commit. See linkgit:git-diff[1].
+
+-e::
+--edit::
+	Edit the changes in the staging area.
 
 SEE ALSO
 --------

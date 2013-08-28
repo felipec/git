@@ -42,4 +42,10 @@ test_expect_success 'diff' '
 	test_file_not_empty out
 '
 
+test_expect_success 'edit' '
+	GIT_EDITOR="sed -i -e \"s/^+foo$/+edit/\"" git stage --edit &&
+	git stage --diff > out &&
+	grep "^+edit$" out
+'
+
 test_done
