@@ -19,7 +19,9 @@ SYNOPSIS
 'git branch' [--track[=(direct|inherit)] | --no-track] [-f]
 	[--recurse-submodules] <branchname> [<start-point>]
 'git branch' (--set-upstream-to=<upstream> | -u <upstream>) [<branchname>]
+'git branch' (--set-publish-to=<publish> | -p <publish>) [<branchname>]
 'git branch' --unset-upstream [<branchname>]
+'git branch' --unset-publish [<branchname>]
 'git branch' (-m | -M) [<oldbranch>] <newbranch>
 'git branch' (-c | -C) [<oldbranch>] <newbranch>
 'git branch' (-d | -D) [-r] <branchname>...
@@ -272,6 +274,15 @@ superproject's "origin/main", but tracks the submodule's "origin/main".
 
 --unset-upstream::
 	Remove the upstream information for <branchname>. If no branch
+	is specified it defaults to the current branch.
+
+-p <publish>::
+--set-publish-to=<publish>::
+	Set up <branchname>'s publish tracking information. If no
+	<branchname> is specified, then it defaults to the current branch.
+
+--unset-publish::
+	Remove the publish information for <branchname>. If no branch
 	is specified it defaults to the current branch.
 
 --edit-description::

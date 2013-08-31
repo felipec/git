@@ -629,8 +629,8 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 {
 	/* possible actions */
 	int delete = 0, rename = 0, copy = 0, list = 0,
-	    unset_upstream = 0, show_current = 0, edit_description = 0;
-	const char *new_upstream = NULL;
+	    unset_upstream = 0, unset_publish = 0, show_current = 0, edit_description = 0;
+	const char *new_upstream = NULL, *publish = NULL;
 	int noncreate_actions = 0;
 	/* possible options */
 	int reflog = 0, quiet = 0, icase = 0, force = 0,
@@ -653,7 +653,9 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 		OPT_SET_INT_F(0, "set-upstream", &track, N_("do not use"),
 			BRANCH_TRACK_OVERRIDE, PARSE_OPT_HIDDEN),
 		OPT_STRING('u', "set-upstream-to", &new_upstream, N_("upstream"), N_("change the upstream info")),
+		OPT_STRING('p', "set-publish-to", &publish, N_("publish"), N_("change the publish info")),
 		OPT_BOOL(0, "unset-upstream", &unset_upstream, N_("unset the upstream info")),
+		OPT_BOOL(0, "unset-publish", &unset_publish, N_("Unset the publish info")),
 		OPT__COLOR(&branch_use_color, N_("use colored output")),
 		OPT_SET_INT('r', "remotes",     &filter.kind, N_("act on remote-tracking branches"),
 			FILTER_REFS_REMOTES),
@@ -714,8 +716,8 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 	argc = parse_options(argc, argv, prefix, options, builtin_branch_usage,
 			     0);
 
-	if (!delete && !rename && !copy && !edit_description && !new_upstream &&
-	    !show_current && !unset_upstream && argc == 0)
+	if (!delete && !rename && !copy && !edit_description && !new_upstream && !publish &&
+	    !show_current && !unset_upstream && !unset_publish && argc == 0)
 		list = 1;
 
 	if (filter.with_commit || filter.no_commit ||
@@ -724,7 +726,7 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 
 	noncreate_actions = !!delete + !!rename + !!copy + !!new_upstream +
 			    !!show_current + !!list + !!edit_description +
-			    !!unset_upstream;
+			    !!unset_upstream + !!unset_publish;
 	if (noncreate_actions > 1)
 		usage_with_options(builtin_branch_usage, options);
 
@@ -887,6 +889,51 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 		git_config_set_multivar(buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "branch.%s.merge", branch->name);
+		git_config_set_multivar(buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		strbuf_release(&buf);
+	} else if (publish) {
+		struct branch *branch = branch_get(argv[0]);
+		char *real_ref = NULL;
+
+		if (argc > 1)
+			die(_("too many branches to set new publish branch"));
+
+		if (!branch) {
+			if (!argc || !strcmp(argv[0], "HEAD"))
+				die(_("could not set upstream of HEAD to %s when "
+				      "it does not point to any branch."),
+				    publish);
+			die(_("no such branch '%s'"), argv[0]);
+		}
+
+		if (!ref_exists(branch->refname))
+			die(_("branch '%s' does not exist"), branch->name);
+
+		if (dwim_ref(publish, strlen(publish), NULL, &real_ref, 0) != 1)
+			die(_("Cannot setup publish branch to '%s'."), publish);
+
+		setup_publish(branch->name, real_ref);
+	} else if (unset_publish) {
+		struct branch *branch = branch_get(argv[0]);
+		struct strbuf buf = STRBUF_INIT;
+
+		if (argc > 1)
+			die(_("too many branches to unset publish branch"));
+
+		if (!branch) {
+			if (!argc || !strcmp(argv[0], "HEAD"))
+				die(_("could not unset publish branch of HEAD when "
+				      "it does not point to any branch."));
+			die(_("no such branch '%s'"), argv[0]);
+		}
+
+		if (!branch->push_name)
+			die(_("Branch '%s' has no publish information"), branch->name);
+
+		strbuf_addf(&buf, "branch.%s.pushremote", branch->name);
+		git_config_set_multivar(buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		strbuf_reset(&buf);
+		strbuf_addf(&buf, "branch.%s.push", branch->name);
 		git_config_set_multivar(buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_release(&buf);
 	} else if (!noncreate_actions && argc > 0 && argc <= 2) {
