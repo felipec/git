@@ -438,7 +438,11 @@ static int do_push(int flags,
 		flags |= TRANSPORT_PUSH_OPTIONS;
 
 	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
+		struct branch *branch = branch_get(NULL);
+		/* Is there a publish branch */
+		if (branch && branch->pushremote_name && !strcmp(remote->name, branch->pushremote_name) && branch->push_name) {
+			refspec_appendf(push_refspec, "%s:%s", branch->refname, branch->push_name);
+		} else if (remote->push.nr) {
 			push_refspec = &remote->push;
 		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
 			setup_default_push_refspecs(&flags, remote);

@@ -73,6 +73,13 @@ branch.<name>.merge::
 	branch.<name>.merge to the desired branch, and use the relative path
 	setting `.` (a period) for branch.<name>.remote.
 
+branch.<name>.push::
+	Defines, together with branch.<name>.pushRemote, the publish branch for
+	the given branch. It tells 'git push' which branch to push to, and
+	overrides any other configurations, such as push.default. It also tells
+	commands such as 'git status' and 'git branch' which remote branch to
+	use for tracking information (commits ahead and behind).
+
 branch.<name>.mergeOptions::
 	Sets default options for merging into branch <name>. The syntax and
 	supported options are the same as those of linkgit:git-merge[1], but

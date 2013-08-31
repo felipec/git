@@ -315,6 +315,8 @@ struct branch {
 	/* An array of the "merge" lines in the configuration. */
 	const char **merge_name;
 
+	const char *push_name;
+
 	/**
 	 * An array of the struct refspecs used for the merge lines. That is,
 	 * merge[i]->dst is a local tracking ref which should be merged into this

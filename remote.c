@@ -366,7 +366,8 @@ static int handle_config(const char *key, const char *value, void *cb)
 			if (!value)
 				return config_error_nonbool(key);
 			add_merge(branch, xstrdup(value));
-		}
+		} else if (!strcmp(subkey, "push"))
+			return git_config_string(&branch->push_name, key, value);
 		return 0;
 	}
 	if (parse_config_key(key, "url", &name, &namelen, &subkey) >= 0) {
