@@ -73,8 +73,8 @@ static const char *transport_get_color(enum color_transport ix)
 	return "";
 }
 
-static void set_upstreams(struct transport *transport, struct ref *refs,
-	int pretend)
+static void set_tracking(struct transport *transport, struct ref *refs,
+	int pretend, int publish)
 {
 	struct ref *ref;
 	for (ref = refs; ref; ref = ref->next) {
@@ -110,11 +110,18 @@ static void set_upstreams(struct transport *transport, struct ref *refs,
 			continue;
 
 		if (!pretend) {
-			int flag = transport->verbose < 0 ? 0 : BRANCH_CONFIG_VERBOSE;
-			install_branch_config(flag, localname + 11,
-				transport->remote->name, remotename);
+			if (publish) {
+				install_branch_publish(localname + 11,
+					transport->remote->name,
+					remotename);
+			} else {
+				int flag = transport->verbose < 0 ? 0 : BRANCH_CONFIG_VERBOSE;
+				install_branch_config(flag, localname + 11,
+					transport->remote->name, remotename);
+			}
 		} else if (transport->verbose >= 0)
-			printf(_("Would set upstream of '%s' to '%s' of '%s'\n"),
+			printf(_("Would set %s of '%s' to '%s' of '%s'\n"),
+				publish ? "publish" : "upstream",
 				localname + 11, remotename + 11,
 				transport->remote->name);
 	}
@@ -1446,7 +1453,9 @@ int transport_push(struct repository *r,
 				reject_reasons);
 
 	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		set_upstreams(transport, remote_refs, pretend);
+		set_tracking(transport, remote_refs, pretend, 0);
+	else if (flags & TRANSPORT_PUSH_SET_PUBLISH)
+		set_tracking(transport, remote_refs, pretend, 1);
 
 	if (!(flags & (TRANSPORT_PUSH_DRY_RUN |
 		       TRANSPORT_RECURSE_SUBMODULES_ONLY))) {
