@@ -33,6 +33,13 @@ test_expect_success 'pull.rebase not set' '
 	test_i18ngrep ! "Pulling without specifying how to reconcile" err
 '
 
+test_expect_success 'pull.mode set' '
+	git reset --hard c0 &&
+	test_config pull.mode merge &&
+	git pull . c1 2>err &&
+	test_i18ngrep ! "Pulling without specifying how to reconcile" err
+'
+
 test_expect_success 'pull.rebase not set and pull.ff=true' '
 	git reset --hard c0 &&
 	test_config pull.ff true &&
@@ -90,6 +97,13 @@ test_expect_success 'pull.rebase not set (not-fast-forward)' '
 	test_decode_color <err >decoded &&
 	test_i18ngrep "<YELLOW>hint: " decoded &&
 	test_i18ngrep "Pulling without specifying how to reconcile" decoded
+'
+
+test_expect_success 'pull.mode set' '
+	git reset --hard c2 &&
+	test_config pull.mode merge &&
+	git pull . c1 2>err &&
+	test_i18ngrep ! "Pulling without specifying how to reconcile" err
 '
 
 test_expect_success 'pull.rebase not set and pull.ff=true (not-fast-forward)' '
