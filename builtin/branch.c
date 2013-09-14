@@ -51,6 +51,7 @@ static char branch_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_GREEN,        /* CURRENT */
 	GIT_COLOR_BLUE,         /* UPSTREAM */
 	GIT_COLOR_CYAN,         /* WORKTREE */
+	GIT_COLOR_YELLOW,	/* PUBLISH */
 };
 enum color_branch {
 	BRANCH_COLOR_RESET = 0,
@@ -59,7 +60,8 @@ enum color_branch {
 	BRANCH_COLOR_LOCAL = 3,
 	BRANCH_COLOR_CURRENT = 4,
 	BRANCH_COLOR_UPSTREAM = 5,
-	BRANCH_COLOR_WORKTREE = 6
+	BRANCH_COLOR_WORKTREE = 6,
+	BRANCH_COLOR_PUBLISH = 7
 };
 
 static const char *color_branch_slots[] = {
@@ -70,6 +72,7 @@ static const char *color_branch_slots[] = {
 	[BRANCH_COLOR_CURRENT]	= "current",
 	[BRANCH_COLOR_UPSTREAM] = "upstream",
 	[BRANCH_COLOR_WORKTREE] = "worktree",
+	[BRANCH_COLOR_PUBLISH]  = "publish",
 };
 
 static struct string_list output = STRING_LIST_INIT_DUP;
@@ -387,11 +390,17 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 			strbuf_addf(&local, "%%(if:notequals=*)%%(HEAD)%%(then)%%(if)%%(worktreepath)%%(then)(%s%%(worktreepath)%s) %%(end)%%(end)",
 				    branch_get_color(BRANCH_COLOR_WORKTREE), branch_get_color(BRANCH_COLOR_RESET));
 
-		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)[%s%%(upstream:short)%s%%(end)",
+		strbuf_addf(&local, "%%(if)%%(upstream)%%(publish)%%(then)[%%(end)");
+		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)%s%%(upstream:short)%s%%(end)",
 			    branch_get_color(BRANCH_COLOR_UPSTREAM), branch_get_color(BRANCH_COLOR_RESET));
 		if (filter->verbose > 1)
 			strbuf_addf(&local, "%%(upstream:trackshort)");
-		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)] %%(end)");
+		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)%%(if)%%(publish)%%(then), %%(end)%%(end)");
+		strbuf_addf(&local, "%%(if)%%(publish)%%(then)%s%%(publish:short)%s%%(end)",
+			    branch_get_color(BRANCH_COLOR_PUBLISH), branch_get_color(BRANCH_COLOR_RESET));
+		if (filter->verbose > 1)
+			strbuf_addf(&local, "%%(publish:trackshort)");
+		strbuf_addf(&local, "%%(if)%%(upstream)%%(publish)%%(then)] %%(end)");
 		strbuf_addf(&local, "%%(contents:subject)");
 
 		strbuf_addf(&remote, "%%(align:%d,left)%s%%(refname:lstrip=2)%%(end)%s"
