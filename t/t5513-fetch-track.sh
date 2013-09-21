@@ -56,7 +56,7 @@ test_fetch_default() {
 }
 
 test_expect_success 'fetch default' '
-	test_fetch_default current
+	test_fetch_default sane
 '
 
 test_expect_success 'fetch default current' '

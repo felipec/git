@@ -212,7 +212,7 @@ test_expect_success 'pull works when tracking a local branch' '
 (
 	cd clone &&
 	git checkout local-main &&
-	git pull
+	git -c fetch.default=current pull
 )
 '
 
