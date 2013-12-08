@@ -35,6 +35,7 @@ fail() {
 test_expect_success 'setup' '
 	test_commit main-one &&
 	test_commit main-two &&
+	git checkout -b publish-branch &&
 	git checkout -b upstream-branch &&
 	test_commit upstream-one &&
 	test_commit upstream-two &&
@@ -51,7 +52,8 @@ test_expect_success 'setup' '
 	test_commit new-one &&
 	test_commit new-two &&
 	git branch -u main old-branch &&
-	git branch -u upstream-branch new-branch
+	git branch -u upstream-branch new-branch &&
+	git branch -p publish-branch new-branch
 '
 
 check HEAD ref refs/heads/new-branch
@@ -67,8 +69,11 @@ check "HEAD@{u}" ref refs/heads/upstream-branch
 check "@{u}@{1}" commit upstream-one
 check "@{-1}@{u}" ref refs/heads/main
 check "@{-1}@{u}@{1}" commit main-one
+check "@{p}" ref refs/heads/publish-branch
+check "HEAD@{p}" ref refs/heads/publish-branch
 check "@" commit new-two
 check "@@{u}" ref refs/heads/upstream-branch
+check "@@{p}" ref refs/heads/publish-branch
 check "@@/at-test" ref refs/heads/@@/at-test
 test_have_prereq MINGW ||
 check "@/at-test" ref refs/heads/@/at-test
