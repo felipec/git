@@ -219,6 +219,8 @@ def get_filechanges(cur, prev):
         modified[u(path)] = fid
     for path, fid, kind in changes.removed:
         removed[u(path)] = None
+    for path, fid, oldkind, newkind in changes.kind_changed:
+        modified[u(path)] = fid
     for path, fid, kind, mod, _ in changes.modified:
         modified[u(path)] = fid
     for oldpath, newpath, fid, kind, mod, _ in changes.renamed:
