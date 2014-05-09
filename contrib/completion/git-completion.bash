@@ -3257,6 +3257,18 @@ _git_tag ()
 	esac
 }
 
+_git_update ()
+{
+	case "$cur" in
+	--*)
+		__gitcomp_builtin update
+
+		return
+		;;
+	esac
+	__git_complete_remote_or_refspec
+}
+
 _git_whatchanged ()
 {
 	_git_log

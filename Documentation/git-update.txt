@@ -1,0 +1,32 @@
+git-update(1)
+=============
+
+NAME
+----
+git-update - Update the current branch to the latest remote
+
+SYNOPSIS
+--------
+[verse]
+'git update'
+
+DESCRIPTION
+-----------
+
+Incorporates changes from a remote repository into the current branch.
+
+`git update` runs `git fetch` and then tries to advance the current branch to
+the remote branch with `git fast-forward`. If you don't have any extra changes
+the update operation is straight-forward, but if you do a further `git merge` or
+`git rebase` will be needed.
+
+THIS COMMAND IS EXPERIMENTAL. THE BEHAVIOUR MAY CHANGE.
+
+SEE ALSO
+--------
+linkgit:git-fetch[1], linkgit:git-fast-forward[1],
+linkgit:git-merge[1], linkgit:git-rebase[1]
+
+GIT
+---
+Part of the linkgit:git[1] suite
