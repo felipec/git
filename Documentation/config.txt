@@ -505,6 +505,8 @@ include::config/revert.txt[]
 
 include::config/safe.txt[]
 
+include::config/update.txt[]
+
 include::config/sendemail.txt[]
 
 include::config/sequencer.txt[]
