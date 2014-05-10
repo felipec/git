@@ -93,6 +93,7 @@ static const char *sign_commit;
 static int autostash;
 static int no_verify;
 static char *into_name;
+static int reverse_parents;
 
 static struct strategy all_strategy[] = {
 	{ "recursive",  NO_TRIVIAL },
@@ -310,6 +311,8 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL(0, "overwrite-ignore", &overwrite_ignore, N_("update ignored files (default)")),
 	OPT_BOOL(0, "signoff", &signoff, N_("add a Signed-off-by trailer")),
 	OPT_BOOL(0, "no-verify", &no_verify, N_("bypass pre-merge-commit and commit-msg hooks")),
+	OPT_BOOL(0, "reverse-parents", &reverse_parents,
+		N_("reverse the order of parents")),
 	OPT_END()
 };
 
@@ -932,6 +935,8 @@ static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
 	pptr = commit_list_append(head, pptr);
 	pptr = commit_list_append(remoteheads->item, pptr);
 	prepare_to_commit(remoteheads);
+	if (reverse_parents)
+		parents = reverse_commit_list(parents);
 	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
 			&result_commit, NULL, sign_commit))
 		die(_("failed to write commit object"));
@@ -956,6 +961,8 @@ static int finish_automerge(struct commit *head,
 	parents = remoteheads;
 	if (!head_subsumed || fast_forward == FF_NO)
 		commit_list_insert(head, &parents);
+	if (reverse_parents)
+		parents = reverse_commit_list(parents);
 	prepare_to_commit(remoteheads);
 	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
 			&result_commit, NULL, sign_commit))
@@ -1069,7 +1076,9 @@ static void write_merge_heads(struct commit_list *remoteheads)
 
 	strbuf_reset(&buf);
 	if (fast_forward == FF_NO)
-		strbuf_addstr(&buf, "no-ff");
+		strbuf_addstr(&buf, "no-ff ");
+	if (reverse_parents)
+		strbuf_addstr(&buf, "reverse ");
 	write_file_buf(git_path_merge_mode(the_repository), buf.buf, buf.len);
 	strbuf_release(&buf);
 }
