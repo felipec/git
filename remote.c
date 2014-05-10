@@ -2309,8 +2309,13 @@ int format_tracking_info(struct branch *branch, struct strbuf *sb,
 	const char *full_base;
 	char *base;
 	int upstream_is_gone = 0;
+	int for_push;
 
-	sti = stat_tracking_info(branch, &ours, &theirs, &full_base, 0, abf);
+	if (!branch)
+		return 0;
+
+	for_push = (branch->push && branch->push->dst) ? 2 : 0;
+	sti = stat_tracking_info(branch, &ours, &theirs, &full_base, for_push, abf);
 	if (sti < 0) {
 		if (!full_base)
 			return 0;
