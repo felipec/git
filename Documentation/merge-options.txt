@@ -149,6 +149,10 @@ ifndef::git-pull[]
 	Note that not all merge strategies may support progress
 	reporting.
 
+--reverse-parents::
+--no-reverse-parents::
+	Reverse the order of parents in the merge commit.
+
 endif::git-pull[]
 
 --autostash::
