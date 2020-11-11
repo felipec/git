@@ -226,6 +226,7 @@ __git_zsh_main ()
 		'--no-replace-objects[do not use replacement refs to replace git objects]' \
 		'(- :)--help[prints the synopsis and a list of the most commonly used commands]: :->arg' \
 		'*-C[run as if git was started in the given path]: :_directories' \
+		'*-c[pass a configuration parameter to the command]: :->config' \
 		'(-): :->command' \
 		'(-)*:: :->arg' && return
 
@@ -238,6 +239,10 @@ __git_zsh_main ()
 			_requested all-commands && __git_zsh_cmd_all
 			let _ret || break
 		done
+		;;
+	(config)
+		compset -P '*[=:]'
+		emulate ksh -c __git_complete_config_variable_name_and_value
 		;;
 	(arg)
 		local command="${words[1]}" __git_dir __git_cmd_idx=1
