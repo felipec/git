@@ -821,7 +821,7 @@ test_expect_success 'general options' '
 	test_completion "git --no-r" "--no-replace-objects"
 '
 
-test_expect_failure 'general options plus command' '
+test_expect_success 'general options plus command' '
 	test_completion "git --version check" "" &&
 	test_completion "git --paginate check" "checkout" &&
 	test_completion "git --git-dir=foo check" "checkout" &&
