@@ -88,11 +88,6 @@ __gitcomp_opts ()
 	compadd -Q -S '' -p "${2-}" -a -- array && _ret=0
 }
 
-__gitcomp_direct ()
-{
-	__gitcomp_nl "$1" "" "" ""
-}
-
 __gitcomp_nl ()
 {
 	emulate -L zsh
@@ -105,6 +100,11 @@ __gitcomp_file ()
 	emulate -L zsh
 
 	compadd -f -p "${2-}" -- ${(f)1} && _ret=0
+}
+
+__gitcomp_direct ()
+{
+	__gitcomp_nl "$1" "" "" ""
 }
 
 __gitcomp_file_direct ()
