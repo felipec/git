@@ -124,7 +124,7 @@ test_expect_success '__gitcomp_opts - option parameter' '
 	EOF
 '
 
-test_expect_failure '__gitcomp_opts - prefix' '
+test_expect_success '__gitcomp_opts - prefix' '
 	test_gitcomp_opts "branch.maint.me" "remote merge mergeoptions rebase" \
 		"branch.maint." "me" <<-\EOF
 	branch.maint.merge Z
@@ -132,7 +132,7 @@ test_expect_failure '__gitcomp_opts - prefix' '
 	EOF
 '
 
-test_expect_failure '__gitcomp_opts - suffix' '
+test_expect_success '__gitcomp_opts - suffix' '
 	test_gitcomp_opts "branch.ma" "master maint next seen" "branch." \
 		"ma" "." <<-\EOF
 	branch.master.Z
