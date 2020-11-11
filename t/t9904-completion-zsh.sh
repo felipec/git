@@ -1097,7 +1097,7 @@ test_expect_success 'git -c - section' '
 	EOF
 '
 
-test_expect_failure 'git -c - variable name' '
+test_expect_success 'git -c - variable name' '
 	test_completion "git -c log.d" <<-\EOF
 	log.date=Z
 	log.decorate=Z
@@ -1119,7 +1119,7 @@ test_expect_success 'git clone --config= - section' '
 	EOF
 '
 
-test_expect_failure 'git clone --config= - variable name' '
+test_expect_success 'git clone --config= - variable name' '
 	test_completion "git clone --config=log.d" <<-\EOF
 	log.date=Z
 	log.decorate=Z
