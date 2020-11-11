@@ -863,7 +863,7 @@ test_expect_success 'checkout completes ref names' '
 	EOF
 '
 
-test_expect_failure 'git -C <path> checkout uses the right repo' '
+test_expect_success 'git -C <path> checkout uses the right repo' '
 	test_completion "git -C subdir -C subsubdir -C .. -C ../otherrepo checkout b" <<-\EOF
 	branch-in-other Z
 	EOF
