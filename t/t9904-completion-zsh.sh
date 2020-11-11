@@ -176,7 +176,7 @@ test_expect_success '__gitcomp - expand/narrow all negative options' '
 	EOF
 '
 
-test_expect_failure '__gitcomp - equal skip' '
+test_expect_success '__gitcomp - equal skip' '
 	test_gitcomp "--option=" "--option=" <<-\EOF &&
 
 	EOF
@@ -1134,7 +1134,7 @@ test_expect_success 'git clone --config= - value' '
 	EOF
 '
 
-test_expect_failure 'options with value' '
+test_expect_success 'options with value' '
 	test_completion "git merge -X diff-algorithm=" <<-\EOF
 
 	EOF
