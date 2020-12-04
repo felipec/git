@@ -66,6 +66,12 @@ test_expect_success 'pull.rebase not set and --no-rebase given' '
 	test_i18ngrep ! "You have divergent branches" err
 '
 
+test_expect_success 'pull.rebase not set and --merge given' '
+	git reset --hard c0 &&
+	git pull --merge . c1 2>err &&
+	test_i18ngrep ! "you need to specify if you want a merge or a rebase" err
+'
+
 test_expect_success 'pull.rebase not set and --ff given' '
 	git reset --hard c0 &&
 	git pull --ff . c1 2>err &&
@@ -123,6 +129,12 @@ test_expect_success 'pull.rebase not set and --no-rebase given (not-fast-forward
 	git reset --hard c2 &&
 	git pull --no-rebase . c1 2>err &&
 	test_i18ngrep ! "You have divergent branches" err
+'
+
+test_expect_success 'pull.rebase not set and --merge given (not-fast-forward)' '
+	git reset --hard c2 &&
+	git pull --merge . c1 2>err &&
+	test_i18ngrep ! "you need to specify if you want a merge or a rebase" err
 '
 
 test_expect_success 'pull.rebase not set and --ff given (not-fast-forward)' '
