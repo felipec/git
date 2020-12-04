@@ -1089,14 +1089,8 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	can_ff = get_can_ff(&orig_head, &merge_heads);
 	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
-	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
-			die_ff_impossible();
-		opt_rebase = REBASE_FALSE;
-	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_rebase && !opt_ff && divergent) {
+	if (!opt_rebase && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}

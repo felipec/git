@@ -95,22 +95,22 @@ test_expect_success 'pull.rebase not set (not-fast-forward)' '
 test_expect_success 'pull.rebase not set and pull.ff=true (not-fast-forward)' '
 	git reset --hard c2 &&
 	test_config pull.ff true &&
-	git pull . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_must_fail git pull . c1 2>err &&
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_expect_success 'pull.rebase not set and pull.ff=false (not-fast-forward)' '
 	git reset --hard c2 &&
 	test_config pull.ff false &&
-	git pull . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_must_fail git pull . c1 2>err &&
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_expect_success 'pull.rebase not set and pull.ff=only (not-fast-forward)' '
 	git reset --hard c2 &&
 	test_config pull.ff only &&
 	test_must_fail git pull . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_expect_success 'pull.rebase not set and --rebase given (not-fast-forward)' '
@@ -127,20 +127,20 @@ test_expect_success 'pull.rebase not set and --no-rebase given (not-fast-forward
 
 test_expect_success 'pull.rebase not set and --ff given (not-fast-forward)' '
 	git reset --hard c2 &&
-	git pull --ff . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_must_fail git pull --ff . c1 2>err &&
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_expect_success 'pull.rebase not set and --no-ff given (not-fast-forward)' '
 	git reset --hard c2 &&
-	git pull --no-ff . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_must_fail git pull --no-ff . c1 2>err &&
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_expect_success 'pull.rebase not set and --ff-only given (not-fast-forward)' '
 	git reset --hard c2 &&
 	test_must_fail git pull --ff-only . c1 2>err &&
-	test_i18ngrep ! "You have divergent branches" err
+	test_i18ngrep "You have divergent branches" err
 '
 
 test_does_rebase () {
@@ -209,20 +209,20 @@ test_attempts_fast_forward () {
 # Group 1: Interaction of --ff-only with --[no-]rebase
 # (And related interaction of pull.ff=only with pull.rebase)
 #
-test_expect_success '--ff-only overrides --rebase' '
-	test_attempts_fast_forward pull --rebase --ff-only
+test_expect_success '--ff-only does not override --rebase' '
+	test_does_rebase pull --rebase --ff-only
 '
 
-test_expect_success '--ff-only overrides --rebase even if first' '
-	test_attempts_fast_forward pull --ff-only --rebase
+test_expect_success '--ff-only does not override --rebase even if first' '
+	test_does_rebase pull --ff-only --rebase
 '
 
 test_expect_success '--ff-only overrides --no-rebase' '
 	test_attempts_fast_forward pull --ff-only --no-rebase
 '
 
-test_expect_success 'pull.ff=only overrides pull.rebase=true' '
-	test_attempts_fast_forward -c pull.ff=only -c pull.rebase=true pull
+test_expect_success 'pull.ff=only does not override pull.rebase=true' '
+	test_does_rebase -c pull.ff=only -c pull.rebase=true pull
 '
 
 test_expect_success 'pull.ff=only overrides pull.rebase=false' '
@@ -252,8 +252,8 @@ test_expect_success 'pull.rebase=true overrides pull.ff=true' '
 '
 
 # Group 3: command line flags take precedence over config
-test_expect_success '--ff-only takes precedence over pull.rebase=true' '
-	test_attempts_fast_forward -c pull.rebase=true pull --ff-only
+test_expect_success '--ff-only does not take precedence over pull.rebase=true' '
+	test_does_rebase -c pull.rebase=true pull --ff-only
 '
 
 test_expect_success '--ff-only takes precedence over pull.rebase=false' '
@@ -264,8 +264,8 @@ test_expect_success 'pull.ff=only takes precedence over --no-rebase' '
 	test_attempts_fast_forward -c pull.ff=only pull --no-rebase
 '
 
-test_expect_success 'pull.ff=only takes precedence over --rebase' '
-	test_attempts_fast_forward -c pull.ff=only pull --rebase
+test_expect_success 'pull.ff=only does not take precedence over --rebase' '
+	test_does_rebase -c pull.ff=only pull --rebase
 '
 
 test_expect_success '--rebase overrides pull.ff=true' '
@@ -334,16 +334,12 @@ test_expect_success 'Multiple heads warns about inability to fast forward' '
 test_expect_success 'Multiple can never be fast forwarded' '
 	git reset --hard c0 &&
 	test_must_fail git -c pull.ff=only pull . c1 c2 c3 2>err &&
-	test_i18ngrep ! "You have divergent branches" err &&
-	# In addition to calling out "cannot fast-forward", we very much
-	# want the "multiple branches" piece to be called out to users.
 	test_i18ngrep "Cannot fast-forward to multiple branches" err
 '
 
 test_expect_success 'Cannot rebase with multiple heads' '
 	git reset --hard c0 &&
 	test_must_fail git -c pull.rebase=true pull . c1 c2 c3 2>err &&
-	test_i18ngrep ! "You have divergent branches" err &&
 	test_i18ngrep "Cannot rebase onto multiple branches." err
 '
 
