@@ -979,18 +979,19 @@ static int get_can_ff(struct object_id *orig_head, struct object_id *orig_merge_
 
 static void show_advice_pull_non_ff(void)
 {
-	advise(_("Pulling without specifying how to reconcile divergent branches is\n"
-		 "discouraged. You can squelch this message by running one of the following\n"
-		 "commands sometime before your next pull:\n"
+	advise(_("Pulling without specifying how to reconcile divergent branches is discouraged;\n"
+		 "you need to specify if you want a merge, or a rebase.\n"
 		 "\n"
-		 "  git config pull.mode merge  # the default strategy\n"
-		 "  git config pull.mode rebase\n"
-		 "  git config pull.mode fast-forward\n"
+		 "  git pull --merge # the default\n"
+		 "  git pull --rebase\n"
 		 "\n"
-		 "You can replace \"git config\" with \"git config --global\" to set a default\n"
-		 "preference for all repositories. You can also pass --rebase, --merge,\n"
-		 "or --ff-only on the command line to override the configured default per\n"
-		 "invocation.\n"));
+		 "You can quell this message by running one of the following commands:\n"
+		 "\n"
+		 "  git config --global pull.mode merge\n"
+		 "  git config --global pull.mode rebase\n"
+		 "  git config --global pull.mode fast-forward\n"
+		 "\n"
+		 "For more information check \"git help fast-forward\"."));
 }
 
 int cmd_pull(int argc, const char **argv, const char *prefix)
