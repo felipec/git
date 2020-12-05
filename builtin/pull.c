@@ -984,6 +984,9 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	int divergent;
 	int ret;
 
+	opt_ff = xstrdup_or_null(config_get_ff());
+	opt_rebase = config_get_rebase();
+
 	if (!getenv("GIT_REFLOG_ACTION"))
 		set_reflog_message(argc, argv);
 
@@ -1006,13 +1009,6 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 		get_cleanup_mode(cleanup_arg, 0);
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
-
-	if (!opt_ff) {
-		opt_ff = xstrdup_or_null(config_get_ff());
-	}
-
-	if (!opt_rebase)
-		opt_rebase = config_get_rebase();
 
 	if (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("pull");
