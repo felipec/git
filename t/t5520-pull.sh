@@ -929,4 +929,12 @@ test_expect_success 'non-fast-forward error message (pull.mode=fast-forward)' '
 	test_i18ngrep "The pull was not fast-forward" error
 '
 
+test_expect_success 'non-fast-forward warning (default)' '
+	setup_non_ff &&
+	git pull 2> error &&
+	cat error &&
+	test_i18ngrep "The pull was not a fast-forward" error &&
+	test_i18ngrep "in the future you will have to choose" error
+'
+
 test_done
