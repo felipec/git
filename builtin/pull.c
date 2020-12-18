@@ -1114,12 +1114,12 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 
 	can_ff = get_can_ff(&orig_head, &merge_heads.oid[0]);
 
-	if (mode == PULL_MODE_FAST_FORWARD && !can_ff)
-		die(_("The pull was not fast-forward, either merge or rebase.\n"));
-
-	if (!opt_rebase && !can_ff) {
-		if (opt_verbosity >= 0)
+	if (!can_ff) {
+		if (!mode && opt_verbosity >= 0)
 			show_advice_pull_non_ff();
+
+		if (mode == PULL_MODE_FAST_FORWARD)
+			die(_("The pull was not fast-forward, either merge or rebase.\n"));
 	}
 
 	if (opt_rebase >= REBASE_TRUE) {
