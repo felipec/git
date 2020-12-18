@@ -608,6 +608,32 @@ test_expect_success 'pull.rebase=1 is treated as true and flattens keep-merge' '
 	test_cmp expect actual
 '
 
+test_expect_success 'pull.rebase=merges rebases and merges keep-merge' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.rebase merges &&
+	git pull . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
+'
+
+test_expect_success 'pull.rebase=merges rebases and merges keep-merge with pull.mode' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode rebase &&
+	test_config pull.rebase merges &&
+	git pull . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
+'
+
+test_expect_success 'pull.rebase=merges interacts correctly with pull.mode and --rebase' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode merge &&
+	test_config pull.rebase merges &&
+	git pull --rebase . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
+'
+
 test_expect_success 'pull.rebase=interactive' '
 	write_script "$TRASH_DIRECTORY/fake-editor" <<-\EOF &&
 	echo I was here >fake.out &&
@@ -673,6 +699,14 @@ test_expect_success '--rebase=true rebases and flattens keep-merge' '
 test_expect_success '--rebase=invalid fails' '
 	git reset --hard before-preserve-rebase &&
 	test_must_fail git pull --rebase=invalid . copy
+'
+
+test_expect_success '--rebase=merges rebases and merges keep-merge' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode rebase &&
+	git pull --rebase=merges . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
 '
 
 test_expect_success '--rebase overrides pull.rebase=merges and flattens keep-merge' '
