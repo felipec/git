@@ -68,8 +68,14 @@ static int parse_opt_rebase(const struct option *opt, const char *arg, int unset
 
 	if (arg)
 		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
+	else {
+		if (!unset) {
+			/* --rebase shouldn't override pull.rebase=merges (and others) */
+			if (*value < REBASE_TRUE)
+				*value = REBASE_TRUE;
+		} else
+			*value = REBASE_FALSE;
+	}
 
 	if (*value > 0)
 		mode = *value >= REBASE_TRUE ? PULL_MODE_REBASE : PULL_MODE_MERGE;
