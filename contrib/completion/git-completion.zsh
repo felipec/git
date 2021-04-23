@@ -33,7 +33,7 @@ if [ -z "$script" ]; then
 		bash_completion='/usr/share/bash-completion/completions/'
 
 	locations=(
-		"$(dirname ${funcsourcetrace[1]%:*})"/git-completion.bash
+		"$(dirname $(realpath ${funcsourcetrace[1]%:*}))"/git-completion.bash
 		"$HOME/.local/share/bash-completion/completions/git"
 		'/usr/local/share/bash-completion/completions/git'
 		"$bash_completion/git"
