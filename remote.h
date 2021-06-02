@@ -335,6 +335,8 @@ struct branch {
 
 	int merge_alloc;
 
+	struct refspec_item *push;
+
 	const char *push_tracking_ref;
 };
 
@@ -366,6 +368,8 @@ const char *branch_get_upstream(struct branch *branch, struct strbuf *err);
  * The return value and `err` conventions match those of `branch_get_upstream`.
  */
 const char *branch_get_push(struct branch *branch, struct strbuf *err);
+
+const char *branch_get_publish(struct branch *branch, struct strbuf *err);
 
 /* Flags to match_refs. */
 enum match_refs_flags {

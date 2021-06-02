@@ -675,9 +675,11 @@ remotes_remote_get_1(struct remote_state *remote_state, const char *name,
 
 	if (name)
 		name_given = 1;
-	else
+	else if (get_default)
 		name = get_default(remote_state, remote_state->current_branch,
 				   &name_given);
+	else
+		return NULL;
 
 	ret = make_remote(remote_state, name, 0);
 	if (valid_remote_nick(name) && have_git_dir()) {
@@ -1822,6 +1824,30 @@ static void set_merge(struct remote_state *remote_state, struct branch *ret)
 	}
 }
 
+static void set_push(struct remote_state *remote_state, struct branch *ret)
+{
+	struct remote *remote;
+	char *ref;
+
+	if (!ret || ret->push || !ret->pushremote_name || !ret->push_name)
+		return;
+
+	remote = remotes_remote_get_1(remote_state, ret->pushremote_name, NULL);
+	if (!remote)
+		return;
+
+	ret->push = xcalloc(1, sizeof(*ret->push));
+	ret->push->src = xstrdup(ret->push_name);
+	if (!remote_find_tracking(remote, ret->push) ||
+		strcmp(ret->pushremote_name, "."))
+		return;
+
+	if (dwim_ref(ret->push_name, strlen(ret->push_name), NULL, &ref, 0) == 1)
+		ret->push->dst = ref;
+	else
+		ret->push->dst = xstrdup(ret->push_name);
+}
+
 struct branch *branch_get(const char *name)
 {
 	struct branch *ret;
@@ -1833,6 +1859,7 @@ struct branch *branch_get(const char *name)
 		ret = make_branch(the_repository->remote_state, name,
 				  strlen(name));
 	set_merge(the_repository->remote_state, ret);
+	set_push(the_repository->remote_state, ret);
 	return ret;
 }
 
@@ -1887,6 +1914,16 @@ const char *branch_get_upstream(struct branch *branch, struct strbuf *err)
 				 branch->merge[0]->src);
 
 	return branch->merge[0]->dst;
+}
+
+const char *branch_get_publish(struct branch *branch, struct strbuf *err)
+{
+	if (!branch)
+		return error_buf(err, _("HEAD does not point to a branch"));
+
+	if (!branch->push || !branch->push->dst)
+		return error_buf(err, _("No publish configured for branch '%s'"), branch->name);
+	return branch->push->dst;
 }
 
 static const char *tracking_for_push_dest(struct remote *remote,
