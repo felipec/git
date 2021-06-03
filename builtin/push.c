@@ -82,9 +82,9 @@ static void refspec_append_mapped(struct refspec *refspec, const char *ref,
 	if (push_default == PUSH_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
 		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		if (branch->merge_nr == 1 && branch->upstream->src) {
 			refspec_appendf(refspec, "%s:%s",
-					ref, branch->merge[0]->src);
+					ref, branch->upstream->src);
 			return;
 		}
 	}
@@ -160,7 +160,7 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 */
 	const char *advice_pushdefault_maybe = "";
 	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
+	const char *short_upstream = branch->upstream->src;
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -208,7 +208,7 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		return branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+	if (!branch->upstream || !branch->remote_name) {
 		const char *advice_autosetup_maybe = "";
 		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
@@ -231,7 +231,7 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	return branch->upstream->src;
 }
 
 static void setup_default_push_refspecs(int *flags, struct remote *remote)

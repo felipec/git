@@ -318,6 +318,8 @@ struct branch {
 
 	const char *pushremote_name;
 
+	struct refspec_item *upstream;
+
 	/* An array of the "merge" lines in the configuration. */
 	const char **merge_name;
 
