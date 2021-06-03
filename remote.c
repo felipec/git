@@ -598,25 +598,31 @@ const char *remote_ref_for_branch(struct branch *branch, int for_push)
 	read_config(the_repository);
 	die_on_missing_branch(the_repository, branch);
 
-	if (branch) {
-		if (!for_push) {
-			if (branch->merge_nr) {
-				return branch->merge_name[0];
-			}
-		} else {
-			const char *dst,
-				*remote_name = remotes_pushremote_for_branch(
-					the_repository->remote_state, branch,
-					NULL);
-			struct remote *remote = remotes_remote_get(
-				the_repository->remote_state, remote_name);
+	if (!branch)
+		return NULL;
 
-			if (remote && remote->push.nr &&
-			    (dst = apply_refspecs(&remote->push,
-						  branch->refname))) {
-				return dst;
-			}
+	switch (for_push) {
+	case 0:
+		if (branch->merge_nr)
+			return branch->merge_name[0];
+		return NULL;
+	case 1: {
+		const char *dst,
+			*remote_name = remotes_pushremote_for_branch(
+				the_repository->remote_state, branch,
+				NULL);
+		struct remote *remote = remotes_remote_get(
+			the_repository->remote_state, remote_name);
+
+		if (remote && remote->push.nr &&
+		    (dst = apply_refspecs(&remote->push,
+					  branch->refname))) {
+			return dst;
 		}
+		return NULL;
+	}
+	case 2:
+		return branch->push_name;
 	}
 	return NULL;
 }
@@ -2277,8 +2283,13 @@ int stat_tracking_info(struct branch *branch, int *num_ours, int *num_theirs,
 	const char *base;
 
 	/* Cannot stat unless we are marked to build on top of somebody else. */
-	base = for_push ? branch_get_push(branch, NULL) :
-		branch_get_upstream(branch, NULL);
+	switch (for_push) {
+	case 0: base = branch_get_upstream(branch, NULL); break;
+	case 1: base = branch_get_push(branch, NULL); break;
+	case 2: base = branch_get_publish(branch, NULL); break;
+	default: return -1;
+	}
+
 	if (tracking_name)
 		*tracking_name = base;
 	if (!base)
