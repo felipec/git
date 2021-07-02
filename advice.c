@@ -110,6 +110,7 @@ static struct {
 	[ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME] 	= { "checkoutAmbiguousRemoteBranchName", 1 },
 	[ADVICE_COMMIT_BEFORE_MERGE]			= { "commitBeforeMerge", 1 },
 	[ADVICE_DETACHED_HEAD]				= { "detachedHead", 1 },
+	[ADVICE_DIVERGING]				= { "diverging", 1 },
 	[ADVICE_FETCH_SHOW_FORCED_UPDATES]		= { "fetchShowForcedUpdates", 1 },
 	[ADVICE_GRAFT_FILE_DEPRECATED]			= { "graftFileDeprecated", 1 },
 	[ADVICE_IGNORED_HOOK]				= { "ignoredHook", 1 },
@@ -329,7 +330,8 @@ void detach_advice(const char *new_name)
 
 void diverging_advice(void)
 {
-	advise(_("Diverging branches can't be fast-forwarded, you need to either:\n"
+	advise_if_enabled(ADVICE_DIVERGING,
+		_("Diverging branches can't be fast-forwarded, you need to either:\n"
 		"\n"
 		"\tgit merge\n"
 		"\n"
