@@ -59,6 +59,7 @@
 /git-difftool--helper
 /git-describe
 /git-fast-export
+/git-fast-forward
 /git-fast-import
 /git-fetch
 /git-fetch-pack
