@@ -15,11 +15,41 @@ DESCRIPTION
 Incorporates changes into the current branch. By default the upstream branch is
 used, but a different commit can be specified in the arguments.
 
+Assume the following history exists and the current branch is
+`master`:
+
+------------
+    D---C---B---A origin/master
+	^
+	|
+      master
+------------
+
+Then `git fast-forward` will advance the local `master` to `origin/master`:
+
+------------
+    D---C---B---A master, origin/master
+------------
+
+This operation is not always possible; if you made changes and the branches
+have diverged:
+
+------------
+    D---C---B---A origin/master
+	 \
+	  X---Y master
+------------
+
+then the fast-forward command will fail.
+
+In those cases you need to either `git merge`, or `git rebase` in order to
+synchronize the two branches.
+
 THIS COMMAND IS EXPERIMENTAL. THE BEHAVIOUR MAY CHANGE.
 
 SEE ALSO
 --------
-linkgit:git-merge[1]
+linkgit:git-merge[1], linkgit:git-rebase[1]
 
 GIT
 ---
