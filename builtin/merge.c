@@ -1278,7 +1278,8 @@ static int merging_a_throwaway_tag(struct commit *commit)
 	return is_throwaway_tag;
 }
 
-int cmd_merge(int argc, const char **argv, const char *prefix)
+static int merge_common(int argc, const char **argv, const char *prefix,
+	const struct option *options, const char * const usage[])
 {
 	struct object_id result_tree, stash, head_oid;
 	struct commit *head_commit;
@@ -1292,7 +1293,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	int orig_argc = argc;
 
 	if (argc == 2 && !strcmp(argv[1], "-h"))
-		usage_with_options(builtin_merge_usage, builtin_merge_options);
+		usage_with_options(usage, options);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -1321,8 +1322,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 	if (branch_mergeoptions)
 		parse_branch_merge_options(branch_mergeoptions);
-	argc = parse_options(argc, argv, prefix, builtin_merge_options,
-			builtin_merge_usage, 0);
+	argc = parse_options(argc, argv, prefix, options, usage, 0);
 	if (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
@@ -1336,7 +1336,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 		if (orig_argc != 2)
 			usage_msg_opt(_("--abort expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+				usage, options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge to abort (MERGE_HEAD missing)."));
@@ -1358,8 +1358,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	if (quit_current_merge) {
 		if (orig_argc != 2)
 			usage_msg_opt(_("--quit expects no arguments"),
-				      builtin_merge_usage,
-				      builtin_merge_options);
+				usage, options);
 
 		remove_merge_branch_state(the_repository);
 		goto done;
@@ -1371,7 +1370,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 		if (orig_argc != 2)
 			usage_msg_opt(_("--continue expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+				usage, options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge in progress (MERGE_HEAD missing)."));
@@ -1438,8 +1437,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	}
 
 	if (!argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+		usage_with_options(usage, options);
 
 	if (!head_commit) {
 		/*
@@ -1480,8 +1478,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 				      argc, argv, &merge_msg);
 
 	if (!head_commit || !argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+		usage_with_options(usage, options);
 
 	if (verify_signatures) {
 		for (p = remoteheads; p; p = p->next) {
@@ -1789,4 +1786,9 @@ done:
 	free(branch_to_free);
 	discard_index(&the_index);
 	return ret;
+}
+
+int cmd_merge(int argc, const char **argv, const char *prefix)
+{
+	return merge_common(argc, argv, prefix, builtin_merge_options, builtin_merge_usage);
 }
