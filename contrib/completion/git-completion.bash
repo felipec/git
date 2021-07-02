@@ -1786,6 +1786,16 @@ _git_difftool ()
 	__git_complete_revlist_file
 }
 
+_git_fast_forward ()
+{
+	case "$cur" in
+	--*)
+		__gitcomp_builtin fast-forward
+		return
+	esac
+	__git_complete_refs
+}
+
 __git_fetch_recurse_submodules="yes on-demand no"
 
 _git_fetch ()

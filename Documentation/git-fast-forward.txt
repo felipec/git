@@ -1,0 +1,26 @@
+git-fast-forward(1)
+===================
+
+NAME
+----
+git-fast-forward - Advance the branch pointer
+
+SYNOPSIS
+--------
+[verse]
+'git fast-forward' [<commit>]
+
+DESCRIPTION
+-----------
+Incorporates changes into the current branch. By default the upstream branch is
+used, but a different commit can be specified in the arguments.
+
+THIS COMMAND IS EXPERIMENTAL. THE BEHAVIOUR MAY CHANGE.
+
+SEE ALSO
+--------
+linkgit:git-merge[1]
+
+GIT
+---
+Part of the linkgit:git[1] suite

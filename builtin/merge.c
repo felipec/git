@@ -61,6 +61,11 @@ static const char * const builtin_merge_usage[] = {
 	NULL
 };
 
+static const char * const builtin_ff_usage[] = {
+	N_("git fast-forward [<commit>]"),
+	NULL
+};
+
 static int show_diffstat = 1, shortlog_len = -1, squash;
 static int option_commit = -1;
 static int option_edit = -1;
@@ -301,6 +306,10 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL(0, "overwrite-ignore", &overwrite_ignore, N_("update ignored files (default)")),
 	OPT_BOOL(0, "signoff", &signoff, N_("add a Signed-off-by trailer")),
 	OPT_BOOL(0, "no-verify", &no_verify, N_("bypass pre-merge-commit and commit-msg hooks")),
+	OPT_END()
+};
+
+static struct option builtin_ff_options[] = {
 	OPT_END()
 };
 
@@ -1739,4 +1748,10 @@ done:
 int cmd_merge(int argc, const char **argv, const char *prefix)
 {
 	return merge_common(argc, argv, prefix, builtin_merge_options, builtin_merge_usage);
+}
+
+int cmd_fast_forward(int argc, const char **argv, const char *prefix)
+{
+	fast_forward = FF_ONLY;
+	return merge_common(argc, argv, prefix, builtin_ff_options, builtin_ff_usage);
 }

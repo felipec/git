@@ -205,6 +205,16 @@ test_expect_success 'merge c0 with c1 with --ff-only' '
 
 test_debug 'git log --graph --decorate --oneline --all'
 
+test_expect_success 'fast-forward c0 with c1' '
+	git reset --hard c0 &&
+	git fast-forward c1 &&
+	git fast-forward HEAD c0 c1 &&
+	verify_merge file result.1 &&
+	verify_head "$c1"
+'
+
+test_debug 'git log --graph --decorate --oneline --all'
+
 test_expect_success 'merge from unborn branch' '
 	git checkout -f main &&
 	test_might_fail git branch -D kid &&
@@ -317,6 +327,17 @@ test_expect_success 'merges with --ff-only' '
 	test_must_fail git merge --ff-only c2 &&
 	test_must_fail git merge --ff-only c3 &&
 	test_must_fail git merge --ff-only c2 c3 &&
+	git reset --hard c0 &&
+	git merge c3 &&
+	verify_head $c3
+'
+
+test_expect_success 'fast-forward' '
+	git reset --hard c1 &&
+	test_tick &&
+	test_must_fail git fast-forward c2 &&
+	test_must_fail git fast-forward c3 &&
+	test_must_fail git fast-forward c2 c3 &&
 	git reset --hard c0 &&
 	git merge c3 &&
 	verify_head $c3
