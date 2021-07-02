@@ -97,5 +97,6 @@ void NORETURN die_resolve_conflict(const char *me);
 void NORETURN die_conclude_merge(void);
 void advise_on_updating_sparse_paths(struct string_list *pathspec_list);
 void detach_advice(const char *new_name);
+void diverging_advice(void);
 
 #endif /* ADVICE_H */

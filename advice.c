@@ -326,3 +326,14 @@ void detach_advice(const char *new_name)
 
 	fprintf(stderr, fmt, new_name);
 }
+
+void diverging_advice(void)
+{
+	advise(_("Diverging branches can't be fast-forwarded, you need to either:\n"
+		"\n"
+		"\tgit merge\n"
+		"\n"
+		"or:\n"
+		"\n"
+		"\tgit rebase\n"));
+}

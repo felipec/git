@@ -1625,8 +1625,10 @@ static int merge_common(int argc, const char **argv, const char *prefix,
 		}
 	}
 
-	if (fast_forward == FF_ONLY)
+	if (fast_forward == FF_ONLY) {
+		diverging_advice();
 		die(_("unable to fast-forward"));
+	}
 
 	if (autostash)
 		create_autostash(the_repository,
