@@ -47,6 +47,54 @@ synchronize the two branches.
 
 THIS COMMAND IS EXPERIMENTAL. THE BEHAVIOUR MAY CHANGE.
 
+MERGE OR REBASE
+---------------
+
+The decision to whether merge or rebase depends on the situation, and the
+project. Traditionally git has prefered merge over rebase, but that creates a
+new commit, and that's frowned up on some projects, so you can't just simply
+choose to merge blindly.
+
+------------
+    D---C---B---A origin/master
+	 \
+	  X---Y master
+------------
+
+The nature of distributed version control systems make this divergence
+unavoidable. You must decide how to synchronize this divergence.
+
+If you choose to merge, the two heads (master and origin/master) will be joined
+together in a new commit:
+
+------------
+	  origin/master
+		|
+		v
+    D---C---B---A---M master
+	 \	   /
+	  X---Y---+
+------------
+
+This new commit is called a merge commit and has two parents (A and Y).
+
+Rebasing on the other hand rewrites the history:
+
+------------
+	  origin/master
+		|
+		v
+    D---C---B---A---X'---Y' master
+------------
+
+The commits that diverged (X and Y) are rewritten as if they were created on top
+of the new base (A). This creates a linear history, which is cleaner, but some
+people prefer to preserve the original hsitory.
+
+In both cases it's likely you would have to resolve conflicts, the difference is
+that in a merge you would have to do it all at once in one commit, while with a
+rebase you would have to do it on every rewritten commit.
+
 SEE ALSO
 --------
 linkgit:git-merge[1], linkgit:git-rebase[1]

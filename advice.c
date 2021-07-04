@@ -337,5 +337,7 @@ void diverging_advice(void)
 		"\n"
 		"or:\n"
 		"\n"
-		"\tgit rebase\n"));
+		"\tgit rebase\n"
+		"\n"
+		"For more information check \"git help fast-forward\".\n"));
 }
