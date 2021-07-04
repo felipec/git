@@ -202,7 +202,7 @@ test_falls_back_to_full_merge () {
 test_attempts_fast_forward () {
 	git reset --hard c2 &&
 	test_must_fail git "$@" . c1 2>err &&
-	test_i18ngrep "Not possible to fast-forward, aborting" err
+	test_i18ngrep "unable to fast-forward" err
 }
 
 #

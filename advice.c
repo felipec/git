@@ -217,7 +217,7 @@ void NORETURN die_conclude_merge(void)
 
 void NORETURN die_ff_impossible(void)
 {
-	die(_("Not possible to fast-forward, aborting."));
+	die(_("unable to fast-forward"));
 }
 
 void advise_on_updating_sparse_paths(struct string_list *pathspec_list)
