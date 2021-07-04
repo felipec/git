@@ -57,7 +57,7 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 		strvec_pushl(&cmd.args, "fast-forward", "FETCH_HEAD", NULL);
 		break;
 	case UPDATE_MODE_MERGE:
-		strvec_pushl(&cmd.args, "merge", "FETCH_HEAD", NULL);
+		strvec_pushl(&cmd.args, "merge", "--reverse-parents", "FETCH_HEAD", NULL);
 		break;
 	default:
 		return 1;
