@@ -8,7 +8,7 @@ git-update - Update the current branch to the latest remote
 SYNOPSIS
 --------
 [verse]
-'git update'
+'git update' [<options>]
 
 DESCRIPTION
 -----------
@@ -21,6 +21,13 @@ the update operation is straight-forward, but if you do a further `git merge` or
 `git rebase` will be needed.
 
 THIS COMMAND IS EXPERIMENTAL. THE BEHAVIOUR MAY CHANGE.
+
+OPTIONS
+-------
+
+-f::
+--ff::
+	Forces a fast-forward.
 
 SEE ALSO
 --------

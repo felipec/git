@@ -7,12 +7,22 @@
 #include "run-command.h"
 #include "dir.h"
 
+enum update_mode_type {
+	UPDATE_MODE_FAST_FORWARD = 0
+};
+
+static enum update_mode_type mode = UPDATE_MODE_FAST_FORWARD;
+
 static const char * const update_usage[] = {
-	N_("git update"),
+	N_("git update [<options>]"),
 	NULL
 };
 
 static struct option update_options[] = {
+	OPT_SET_INT_F('f', "ff", &mode,
+		N_("incorporate changes by fast-forwarding"),
+		UPDATE_MODE_FAST_FORWARD, PARSE_OPT_NONEG),
+
 	OPT_END()
 };
 
@@ -56,5 +66,8 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 	if (run_fetch())
 		return 1;
 
-	return run_fast_forward();
+	if (mode == UPDATE_MODE_FAST_FORWARD)
+		return run_fast_forward();
+
+	return 1;
 }
