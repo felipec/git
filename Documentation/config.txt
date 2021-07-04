@@ -466,6 +466,8 @@ include::config/trace2.txt[]
 
 include::config/transfer.txt[]
 
+include::config/update.txt[]
+
 include::config/uploadarchive.txt[]
 
 include::config/uploadpack.txt[]

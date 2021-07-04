@@ -5,9 +5,11 @@
 #include "builtin.h"
 #include "parse-options.h"
 #include "run-command.h"
+#include "config.h"
 #include "dir.h"
 
 enum update_mode_type {
+	UPDATE_MODE_INVALID = -1,
 	UPDATE_MODE_FAST_FORWARD = 0,
 	UPDATE_MODE_MERGE,
 	UPDATE_MODE_REBASE
@@ -33,6 +35,28 @@ static struct option update_options[] = {
 
 	OPT_END()
 };
+
+static enum update_mode_type update_mode_parse_value(const char *value)
+{
+	if (!strcmp(value, "fast-forward"))
+		return UPDATE_MODE_FAST_FORWARD;
+	if (!strcmp(value, "merge"))
+		return UPDATE_MODE_MERGE;
+	if (!strcmp(value, "rebase"))
+		return UPDATE_MODE_REBASE;
+
+	return UPDATE_MODE_INVALID;
+}
+
+static int git_update_config(const char *var, const char *value, void *cb)
+{
+	if (!strcmp(var, "update.mode")) {
+		mode = update_mode_parse_value(value);
+		return 0;
+	}
+
+	return git_default_config(var, value, cb);
+}
 
 static int run_fetch(void)
 {
@@ -86,6 +110,8 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 {
 	if (!getenv("GIT_REFLOG_ACTION"))
 		setenv("GIT_REFLOG_ACTION", "update", 0);
+
+	git_config(git_update_config, NULL);
 
 	argc = parse_options(argc, argv, prefix, update_options, update_usage, 0);
 
