@@ -7,6 +7,13 @@ export GIT_TEST_DEFAULT_INITIAL_BRANCH_NAME
 
 . ./test-lib.sh
 
+check_msg () {
+	test "$2" != "master" && into=" into '$2'"
+	echo "Merge branch '$1'${into}" > expected
+	git log -1 --format=%s > actual &&
+	test_cmp expected actual
+}
+
 test_expect_success 'setup' '
 	echo one > file &&
 	git add file &&
@@ -55,7 +62,8 @@ test_expect_success 'git update non-fast-forward with merge' '
 	git reset --hard master &&
 	git update --merge &&
 	test_cmp_rev @^2 master &&
-	test_cmp_rev @^1 other
+	test_cmp_rev @^1 other &&
+	check_msg test other
 	)
 '
 

@@ -7,7 +7,8 @@
 
 struct fmt_merge_msg_opts {
 	unsigned add_title:1,
-		credit_people:1;
+		credit_people:1,
+		reverse_parents:1;
 	int shortlog_len;
 };
 
