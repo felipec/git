@@ -1118,8 +1118,10 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 		if (!mode && opt_verbosity >= 0)
 			show_advice_pull_non_ff();
 
-		if (mode == PULL_MODE_FAST_FORWARD)
+		if (mode == PULL_MODE_FAST_FORWARD) {
+			diverging_advice();
 			die(_("The pull was not fast-forward, either merge or rebase.\n"));
+		}
 	}
 
 	if (opt_rebase >= REBASE_TRUE) {
