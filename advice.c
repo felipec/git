@@ -225,7 +225,9 @@ void NORETURN die_ff_impossible(void)
 		"\n"
 		"or:\n"
 		"\n"
-		"\tgit rebase\n"));
+		"\tgit rebase\n"
+		"\n"
+		"For more information check \"git help fast-forward\".\n"));
 	die(_("unable to fast-forward"));
 }
 
