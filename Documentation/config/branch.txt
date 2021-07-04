@@ -96,6 +96,11 @@ mode.
 it unless you understand the implications (see linkgit:git-rebase[1]
 for details).
 
+branch.<name>.updateMode::
+	When `git update` is run, this determines the mode of operation,
+	possible values are 'fast-forward', 'merge', and 'rebase'.
+	See `update.mode` for doing this in a non branch-specific manner.
+
 branch.<name>.description::
 	Branch description, can be edited with
 	`git branch --edit-description`. Branch description is

@@ -1,4 +1,5 @@
 update.mode::
 	When `git update` is run, this determines the mode of operation,
 	possible values are 'fast-forward', 'merge', and 'rebase'. The default
-	is 'fast-forward'.
+	is 'fast-forward'. See "branch.<name>.updateMode" for setting this on a
+	per-branch basis.
