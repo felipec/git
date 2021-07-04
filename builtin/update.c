@@ -8,7 +8,8 @@
 #include "dir.h"
 
 enum update_mode_type {
-	UPDATE_MODE_FAST_FORWARD = 0
+	UPDATE_MODE_FAST_FORWARD = 0,
+	UPDATE_MODE_MERGE
 };
 
 static enum update_mode_type mode = UPDATE_MODE_FAST_FORWARD;
@@ -22,6 +23,9 @@ static struct option update_options[] = {
 	OPT_SET_INT_F('f', "ff", &mode,
 		N_("incorporate changes by fast-forwarding"),
 		UPDATE_MODE_FAST_FORWARD, PARSE_OPT_NONEG),
+	OPT_SET_INT_F('m', "merge", &mode,
+		N_("incorporate changes by merging"),
+		UPDATE_MODE_MERGE, PARSE_OPT_NONEG),
 
 	OPT_END()
 };
@@ -50,6 +54,18 @@ static int run_fast_forward(void)
 	return ret;
 }
 
+static int run_merge(void)
+{
+	int ret;
+	struct strvec args = STRVEC_INIT;
+
+	strvec_pushl(&args, "merge", "FETCH_HEAD", NULL);
+
+	ret = run_command_v_opt(args.v, RUN_GIT_CMD);
+	strvec_clear(&args);
+	return ret;
+}
+
 int cmd_update(int argc, const char **argv, const char *prefix)
 {
 	if (!getenv("GIT_REFLOG_ACTION"))
@@ -68,6 +84,8 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 
 	if (mode == UPDATE_MODE_FAST_FORWARD)
 		return run_fast_forward();
+	if (mode == UPDATE_MODE_MERGE)
+		return run_merge();
 
 	return 1;
 }

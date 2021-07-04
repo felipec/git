@@ -42,4 +42,19 @@ test_expect_success 'non-fast-forward update' '
 	)
 '
 
+test_expect_success 'git update non-fast-forward with merge' '
+	test_when_finished "rm -rf test" &&
+	(
+	git clone . test &&
+	cd test &&
+	git checkout -b other master^ &&
+	>new &&
+	git add new &&
+	git commit -m new &&
+	git checkout -b test -t other &&
+	git reset --hard master &&
+	git update --merge
+	)
+'
+
 test_done
