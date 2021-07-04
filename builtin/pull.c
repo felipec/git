@@ -374,7 +374,20 @@ static enum rebase_type config_get_rebase(void)
 
 static enum pull_mode_type config_get_pull_mode(const char *repo)
 {
+	struct branch *curr_branch = branch_get("HEAD");
 	const char *value;
+
+	if (curr_branch) {
+		char *key = xstrfmt("branch.%s.pullmode", curr_branch->name);
+
+		if (!git_config_get_value(key, &value)) {
+			enum pull_mode_type ret = parse_config_pull_mode(key, value);
+			free(key);
+			return ret;
+		}
+
+		free(key);
+	}
 
 	if (!git_config_get_value("pull.mode", &value))
 		return parse_config_pull_mode("pull.mode", value);

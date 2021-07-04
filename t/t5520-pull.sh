@@ -493,6 +493,17 @@ test_expect_success 'branch.to-rebase.rebase should override pull.rebase' '
 	test_cmp expect actual
 '
 
+test_expect_success 'branch..pullmode overrides pull.mode' '
+	git reset --hard before-rebase &&
+	test_config pull.mode rebase &&
+	test_config branch.to-rebase.pullmode merge &&
+	git pull . copy &&
+	test_cmp_rev ! HEAD^ copy &&
+	echo new >expect &&
+	git show HEAD:file2 >actual &&
+	test_cmp expect actual
+'
+
 test_expect_success 'pull --rebase warns on --verify-signatures' '
 	git reset --hard before-rebase &&
 	git pull --rebase --verify-signatures . copy 2>err &&
