@@ -8,7 +8,8 @@
 #include "dir.h"
 
 enum update_mode_type {
-	UPDATE_MODE_FAST_FORWARD = 0
+	UPDATE_MODE_FAST_FORWARD = 0,
+	UPDATE_MODE_MERGE
 };
 
 static enum update_mode_type mode = UPDATE_MODE_FAST_FORWARD;
@@ -22,6 +23,9 @@ static struct option update_options[] = {
 	OPT_SET_INT_F('f', "ff", &mode,
 		N_("incorporate changes by fast-forwarding"),
 		UPDATE_MODE_FAST_FORWARD, PARSE_OPT_NONEG),
+	OPT_SET_INT_F('m', "merge", &mode,
+		N_("incorporate changes by merging"),
+		UPDATE_MODE_MERGE, PARSE_OPT_NONEG),
 
 	OPT_END()
 };
@@ -51,6 +55,9 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 	switch (mode) {
 	case UPDATE_MODE_FAST_FORWARD:
 		strvec_pushl(&cmd.args, "fast-forward", "FETCH_HEAD", NULL);
+		break;
+	case UPDATE_MODE_MERGE:
+		strvec_pushl(&cmd.args, "merge", "FETCH_HEAD", NULL);
 		break;
 	default:
 		return 1;

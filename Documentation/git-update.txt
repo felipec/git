@@ -29,6 +29,10 @@ OPTIONS
 --ff::
 	Forces a fast-forward.
 
+-m::
+--merge::
+	Forces a merge.
+
 SEE ALSO
 --------
 linkgit:git-fetch[1], linkgit:git-fast-forward[1],
