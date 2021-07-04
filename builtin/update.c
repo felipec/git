@@ -59,7 +59,7 @@ static int run_merge(void)
 	int ret;
 	struct strvec args = STRVEC_INIT;
 
-	strvec_pushl(&args, "merge", "FETCH_HEAD", NULL);
+	strvec_pushl(&args, "merge", "--reverse-parents", "FETCH_HEAD", NULL);
 
 	ret = run_command_v_opt(args.v, RUN_GIT_CMD);
 	strvec_clear(&args);

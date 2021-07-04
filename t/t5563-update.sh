@@ -53,7 +53,9 @@ test_expect_success 'git update non-fast-forward with merge' '
 	git commit -m new &&
 	git checkout -b test -t other &&
 	git reset --hard master &&
-	git update --merge
+	git update --merge &&
+	test_cmp_rev @^2 master &&
+	test_cmp_rev @^1 other
 	)
 '
 
