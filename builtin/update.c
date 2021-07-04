@@ -9,7 +9,8 @@
 
 enum update_mode_type {
 	UPDATE_MODE_FAST_FORWARD = 0,
-	UPDATE_MODE_MERGE
+	UPDATE_MODE_MERGE,
+	UPDATE_MODE_REBASE
 };
 
 static enum update_mode_type mode = UPDATE_MODE_FAST_FORWARD;
@@ -26,6 +27,9 @@ static struct option update_options[] = {
 	OPT_SET_INT_F('m', "merge", &mode,
 		N_("incorporate changes by merging"),
 		UPDATE_MODE_MERGE, PARSE_OPT_NONEG),
+	OPT_SET_INT_F('r', "rebase", &mode,
+		N_("incorporate changes by rebasing"),
+		UPDATE_MODE_REBASE, PARSE_OPT_NONEG),
 
 	OPT_END()
 };
@@ -58,6 +62,9 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 		break;
 	case UPDATE_MODE_MERGE:
 		strvec_pushl(&cmd.args, "merge", "--reverse-parents", "FETCH_HEAD", NULL);
+		break;
+	case UPDATE_MODE_REBASE:
+		strvec_pushl(&cmd.args, "rebase", "FETCH_HEAD", NULL);
 		break;
 	default:
 		return 1;

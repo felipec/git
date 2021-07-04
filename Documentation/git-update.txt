@@ -33,6 +33,10 @@ OPTIONS
 --merge::
 	Forces a merge.
 
+-r::
+--rebase::
+	Forces a rebase.
+
 SEE ALSO
 --------
 linkgit:git-fetch[1], linkgit:git-fast-forward[1],

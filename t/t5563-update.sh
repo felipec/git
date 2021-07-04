@@ -67,4 +67,21 @@ test_expect_success 'git update non-fast-forward with merge' '
 	)
 '
 
+test_expect_success 'git update non-fast-forward with rebase' '
+	test_when_finished "rm -rf test" &&
+	(
+	git clone . test &&
+	cd test &&
+	git checkout -b other master^ &&
+	>new &&
+	git add new &&
+	git commit -m new &&
+	git checkout -b test -t other &&
+	git reset --hard master &&
+	git update --rebase &&
+	test_cmp_rev @^ other &&
+	test_must_fail git rev-parse --verify -q @^2
+	)
+'
+
 test_done
