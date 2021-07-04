@@ -7,6 +7,7 @@
 #include "run-command.h"
 #include "config.h"
 #include "dir.h"
+#include "remote.h"
 
 enum update_mode_type {
 	UPDATE_MODE_INVALID = -1,
@@ -56,6 +57,22 @@ static int git_update_config(const char *var, const char *value, void *cb)
 	}
 
 	return git_default_config(var, value, cb);
+}
+
+static void get_branch_config(void)
+{
+	struct branch *cur_branch = branch_get("HEAD");
+	char *key;
+	const char *value;
+
+	if (!cur_branch)
+		return;
+
+	key = xstrfmt("branch.%s.updatemode", cur_branch->name);
+	if (!git_config_get_value(key, &value))
+		mode = update_mode_parse_value(value);
+
+	free(key);
 }
 
 static int run_fetch(void)
@@ -112,6 +129,7 @@ int cmd_update(int argc, const char **argv, const char *prefix)
 		setenv("GIT_REFLOG_ACTION", "update", 0);
 
 	git_config(git_update_config, NULL);
+	get_branch_config();
 
 	argc = parse_options(argc, argv, prefix, update_options, update_usage, 0);
 
