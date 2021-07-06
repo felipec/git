@@ -1,0 +1,8 @@
+title: git-fc
+description: Fork of Git, same baseline, more features
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-slate
+
+gems:
+  - jekyll-mentions
