@@ -1833,6 +1833,8 @@ int cmd_switch(int argc, const char **argv, const char *prefix)
 	struct checkout_opts opts;
 	struct option *options = NULL;
 	struct option switch_options[] = {
+		OPT_STRING('n', "new", &opts.new_branch, N_("branch"),
+			   N_("create and switch to a new branch")),
 		OPT_STRING('c', "create", &opts.new_branch, N_("branch"),
 			   N_("create and switch to a new branch")),
 		OPT_STRING('C', "force-create", &opts.new_branch_force, N_("branch"),
