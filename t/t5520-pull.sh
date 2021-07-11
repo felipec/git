@@ -452,6 +452,16 @@ test_expect_success 'pull.rebase' '
 	test_cmp expect actual
 '
 
+test_expect_success 'pull.mode rebase' '
+	git reset --hard before-rebase &&
+	test_config pull.mode rebase &&
+	git pull . copy &&
+	test_cmp_rev HEAD^ copy &&
+	echo new >expect &&
+	git show HEAD:file2 >actual &&
+	test_cmp expect actual
+'
+
 test_expect_success 'pull --autostash & pull.rebase=true' '
 	test_config pull.rebase true &&
 	test_pull_autostash 1 --autostash
@@ -476,6 +486,17 @@ test_expect_success 'branch.to-rebase.rebase should override pull.rebase' '
 	git reset --hard before-rebase &&
 	test_config pull.rebase true &&
 	test_config branch.to-rebase.rebase false &&
+	git pull . copy &&
+	test_cmp_rev ! HEAD^ copy &&
+	echo new >expect &&
+	git show HEAD:file2 >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success 'branch..pullmode overrides pull.mode' '
+	git reset --hard before-rebase &&
+	test_config pull.mode rebase &&
+	test_config branch.to-rebase.pullmode merge &&
 	git pull . copy &&
 	test_cmp_rev ! HEAD^ copy &&
 	echo new >expect &&
@@ -526,6 +547,17 @@ test_expect_success 'pull.rebase=false create a new merge commit' '
 	test_cmp expect actual
 '
 
+test_expect_success 'pull.mode=merge create a new merge commit' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode merge &&
+	git pull . copy &&
+	test_cmp_rev HEAD^1 before-preserve-rebase &&
+	test_cmp_rev HEAD^2 copy &&
+	echo file3 >expect &&
+	git show HEAD:file3.t >actual &&
+	test_cmp expect actual
+'
+
 test_expect_success 'pull.rebase=true flattens keep-merge' '
 	git reset --hard before-preserve-rebase &&
 	test_config pull.rebase true &&
@@ -551,6 +583,26 @@ test_expect_success REBASE_P \
 	git reset --hard before-preserve-rebase &&
 	test_config pull.rebase preserve &&
 	git pull . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
+'
+
+test_expect_success REBASE_P \
+	'pull.rebase=preserve rebases and merges keep-merge with pull.mode' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode rebase &&
+	test_config pull.rebase preserve &&
+	git pull . copy &&
+	test_cmp_rev HEAD^^ copy &&
+	test_cmp_rev HEAD^2 keep-merge
+'
+
+test_expect_success REBASE_P \
+	'pull.rebase=preserve interacts correctly with pull.mode and --rebase' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode merge &&
+	test_config pull.rebase preserve &&
+	git pull --rebase . copy &&
 	test_cmp_rev HEAD^^ copy &&
 	test_cmp_rev HEAD^2 keep-merge
 '
@@ -588,6 +640,17 @@ test_expect_success 'pull.rebase=invalid fails' '
 test_expect_success '--rebase=false create a new merge commit' '
 	git reset --hard before-preserve-rebase &&
 	test_config pull.rebase true &&
+	git pull --rebase=false . copy &&
+	test_cmp_rev HEAD^1 before-preserve-rebase &&
+	test_cmp_rev HEAD^2 copy &&
+	echo file3 >expect &&
+	git show HEAD:file3.t >actual &&
+	test_cmp expect actual
+'
+
+test_expect_success '--rebase=false create a new merge commit with pull.mode' '
+	git reset --hard before-preserve-rebase &&
+	test_config pull.mode rebase &&
 	git pull --rebase=false . copy &&
 	test_cmp_rev HEAD^1 before-preserve-rebase &&
 	test_cmp_rev HEAD^2 copy &&
@@ -820,6 +883,58 @@ test_expect_success 'git pull --rebase against local branch' '
 	test_cmp expect file &&
 	echo file >expect &&
 	test_cmp expect file2
+'
+
+setup_other () {
+	test_when_finished "git checkout main && git branch -D other test" &&
+	git checkout -b other $1 &&
+	>new &&
+	git add new &&
+	git commit -m new &&
+	git checkout -b test -t other &&
+	git reset --hard main
+}
+
+setup_ff () {
+	setup_other main
+}
+
+setup_non_ff () {
+	setup_other main^
+}
+
+test_expect_success 'fast-forward (pull.mode=fast-forward)' '
+	setup_ff &&
+	git -c pull.mode=fast-forward pull
+'
+
+test_expect_success 'non-fast-forward (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	test_must_fail git -c pull.mode=fast-forward pull
+'
+
+test_expect_success 'non-fast-forward with merge (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	git -c pull.mode=fast-forward pull --merge
+'
+
+test_expect_success 'non-fast-forward with rebase (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	git -c pull.mode=fast-forward pull --rebase
+'
+
+test_expect_success 'non-fast-forward error message (pull.mode=fast-forward)' '
+	setup_non_ff &&
+	test_must_fail git -c pull.mode=fast-forward pull 2> error &&
+	test_i18ngrep "The pull was not fast-forward" error
+'
+
+test_expect_success 'non-fast-forward warning (default)' '
+	setup_non_ff &&
+	git pull 2> error &&
+	cat error &&
+	test_i18ngrep "The pull was not a fast-forward" error &&
+	test_i18ngrep "in the future you will have to choose" error
 '
 
 test_done

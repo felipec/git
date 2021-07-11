@@ -440,6 +440,8 @@ include::config/rerere.txt[]
 
 include::config/reset.txt[]
 
+include::config/update.txt[]
+
 include::config/sendemail.txt[]
 
 include::config/sequencer.txt[]
@@ -463,6 +465,8 @@ include::config/tar.txt[]
 include::config/trace2.txt[]
 
 include::config/transfer.txt[]
+
+include::config/update.txt[]
 
 include::config/uploadarchive.txt[]
 

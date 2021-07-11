@@ -62,6 +62,7 @@
 /git-describe
 /git-env--helper
 /git-fast-export
+/git-fast-forward
 /git-fast-import
 /git-fetch
 /git-fetch-pack
@@ -170,6 +171,7 @@
 /git-tag
 /git-unpack-file
 /git-unpack-objects
+/git-update
 /git-update-index
 /git-update-ref
 /git-update-server-info

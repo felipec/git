@@ -432,6 +432,19 @@ static int dest_suppressed(const char *dest_branch)
 	return 0;
 }
 
+static void fmt_update_msg_title(struct strbuf *out, const char *current_branch)
+{
+	struct src_data *src_data;
+	strbuf_addf(out, "Merge branch '%s'", current_branch);
+	src_data = srcs.items[0].util;
+	if (src_data->branch.nr) {
+		const char *branch_name = src_data->branch.items[0].string;
+		if (!dest_suppressed(branch_name))
+			strbuf_addf(out, " into %s", branch_name);
+	}
+	strbuf_addch(out, '\n');
+}
+
 static void fmt_merge_msg_title(struct strbuf *out,
 				const char *current_branch)
 {
@@ -665,8 +678,12 @@ int fmt_merge_msg(struct strbuf *in, struct strbuf *out,
 			die("error in line %d: %.*s", i, len, p);
 	}
 
-	if (opts->add_title && srcs.nr)
-		fmt_merge_msg_title(out, current_branch);
+	if (opts->add_title && srcs.nr) {
+		if (opts->reverse_parents)
+			fmt_update_msg_title(out, current_branch);
+		else
+			fmt_merge_msg_title(out, current_branch);
+	}
 
 	if (origins.nr)
 		fmt_merge_msg_sigs(out);

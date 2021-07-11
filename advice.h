@@ -49,6 +49,7 @@ extern int advice_add_empty_pathspec;
 	ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME,
 	ADVICE_COMMIT_BEFORE_MERGE,
 	ADVICE_DETACHED_HEAD,
+	ADVICE_DIVERGING,
 	ADVICE_FETCH_SHOW_FORCED_UPDATES,
 	ADVICE_GRAFT_FILE_DEPRECATED,
 	ADVICE_IGNORED_HOOK,
@@ -97,5 +98,6 @@ void NORETURN die_resolve_conflict(const char *me);
 void NORETURN die_conclude_merge(void);
 void advise_on_updating_sparse_paths(struct string_list *pathspec_list);
 void detach_advice(const char *new_name);
+void diverging_advice(void);
 
 #endif /* ADVICE_H */
