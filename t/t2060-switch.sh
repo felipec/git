@@ -41,9 +41,18 @@ test_expect_success 'switch and detach current branch' '
 
 test_expect_success 'switch and create branch' '
 	test_when_finished git switch main &&
-	git switch -c temp main^ &&
+	git switch -n temp main^ &&
 	test_cmp_rev main^ refs/heads/temp &&
 	echo refs/heads/temp >expected-branch &&
+	git symbolic-ref HEAD >actual-branch &&
+	test_cmp expected-branch actual-branch
+'
+
+test_expect_success 'switch and create branch (deprecated)' '
+	test_when_finished git switch main &&
+	git switch -c temp-d main^ &&
+	test_cmp_rev main^ refs/heads/temp-d &&
+	echo refs/heads/temp-d >expected-branch &&
 	git symbolic-ref HEAD >actual-branch &&
 	test_cmp expected-branch actual-branch
 '
@@ -51,7 +60,7 @@ test_expect_success 'switch and create branch' '
 test_expect_success 'force create branch from HEAD' '
 	test_when_finished git switch main &&
 	git switch --detach main &&
-	test_must_fail git switch -c temp &&
+	test_must_fail git switch -n temp &&
 	git switch -C temp &&
 	test_cmp_rev main refs/heads/temp &&
 	echo refs/heads/temp >expected-branch &&
