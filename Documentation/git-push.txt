@@ -39,9 +39,9 @@ what to push (See linkgit:git-config[1] for the meaning of `push.default`).
 
 When neither the command-line nor the configuration specify what to
 push, the default behavior is used, which corresponds to the `simple`
-value for `push.default`: the current branch is pushed to the
-corresponding upstream branch, but as a safety measure, the push is
-aborted if the upstream branch does not have the same name as the
+value for `push.default`: the current branch is pushed to a remote
+branch with the same name, but as a safety measure the push is aborted
+if there's a configured upstream branch with a different name than the
 local one.
 
 

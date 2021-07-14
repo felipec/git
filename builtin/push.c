@@ -271,10 +271,10 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 		if (!same_remote)
 			break;
 		dst = get_upstream_ref(*flags, branch);
-		if (!dst)
-			die_no_upstream(*flags, branch, remote);
-		if (strcmp(branch->refname, dst))
+		if (dst && strcmp(branch->refname, dst))
 			die_push_simple(branch, remote);
+		if (!dst)
+			dst = branch->refname;
 		break;
 
 	case PUSH_DEFAULT_UPSTREAM:

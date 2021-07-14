@@ -38,8 +38,9 @@ push.default::
 * `simple` - pushes the current branch with the same name on the remote.
 +
 If you are working on a centralized workflow (pushing to the same repository you
-pull from, which is typically `origin`), then you need to configure an upstream
-branch with the same name.
+pull from, which is typically `origin`), and you have configured an upstream
+branch, then the name must be the same as the current branch, otherwise this
+action will fail as a precaution.
 +
 This mode is the default since Git 2.0, and is the safest option suited for
 beginners.
