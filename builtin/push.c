@@ -201,37 +201,41 @@ static const char message_detached_head_die[] =
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+static const char *get_upstream_ref(int flags, struct branch *branch)
 {
 	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
 		return branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
-			advice_autosetup_maybe = _("\n"
-					   "To have this happen automatically for "
-					   "branches without a tracking\n"
-					   "upstream, see 'push.autoSetupRemote' "
-					   "in 'git help config'.\n");
-		}
-		die(_("The current branch %s has no upstream branch.\n"
-		    "To push the current branch and set the remote as upstream, use\n"
-		    "\n"
-		    "    git push --set-upstream %s %s\n"
-		    "%s"),
-		    branch->name,
-		    remote_name,
-		    branch->name,
-		    advice_autosetup_maybe);
-	}
+	if (!branch->merge_nr || !branch->merge || !branch->remote_name)
+		return NULL;
 	if (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
 	return branch->merge[0]->src;
+}
+
+static void die_no_upstream(int flags, struct branch *branch, struct remote *remote)
+{
+	const char *advice_autosetup_maybe = "";
+	if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+		advice_autosetup_maybe = _("\n"
+				   "To have this happen automatically for "
+				   "branches without a tracking\n"
+				   "upstream, see 'push.autoSetupRemote' "
+				   "in 'git help config'.\n");
+	}
+	die(_("The current branch %s has no upstream branch.\n"
+	    "To push the current branch and set the remote as upstream, use\n"
+	    "\n"
+	    "    git push --set-upstream %s %s\n"
+	    "%s"),
+	    branch->name,
+	    remote->name,
+	    branch->name,
+	    advice_autosetup_maybe);
 }
 
 static void setup_default_push_refspecs(int *flags, struct remote *remote)
@@ -266,7 +270,10 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	case PUSH_DEFAULT_SIMPLE:
 		if (!same_remote)
 			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+		dst = get_upstream_ref(*flags, branch);
+		if (!dst)
+			die_no_upstream(*flags, branch, remote);
+		if (strcmp(branch->refname, dst))
 			die_push_simple(branch, remote);
 		break;
 
@@ -276,7 +283,9 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
-		dst = get_upstream_ref(*flags, branch, remote->name);
+		dst = get_upstream_ref(*flags, branch);
+		if (!dst)
+			die_no_upstream(*flags, branch, remote);
 		break;
 
 	case PUSH_DEFAULT_CURRENT:
