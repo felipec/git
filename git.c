@@ -592,6 +592,7 @@ static struct cmd_struct commands[] = {
 	{ "switch", cmd_switch, RUN_SETUP | NEED_WORK_TREE },
 	{ "symbolic-ref", cmd_symbolic_ref, RUN_SETUP },
 	{ "tag", cmd_tag, RUN_SETUP | DELAY_PAGER_CONFIG },
+	{ "unstage", cmd_unstage, RUN_SETUP | NEED_WORK_TREE },
 	{ "unpack-file", cmd_unpack_file, RUN_SETUP | NO_PARSEOPT },
 	{ "unpack-objects", cmd_unpack_objects, RUN_SETUP | NO_PARSEOPT },
 	{ "update-index", cmd_update_index, RUN_SETUP },

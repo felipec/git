@@ -28,4 +28,11 @@ test_expect_success 'remove' '
 	! in_stage bar
 '
 
+test_expect_success 'unstage' '
+	touch bar &&
+	git stage bar &&
+	git unstage bar &&
+	! in_stage bar
+'
+
 test_done

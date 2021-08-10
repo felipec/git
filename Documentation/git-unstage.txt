@@ -1,0 +1,24 @@
+git-unstage(1)
+==============
+
+NAME
+----
+git-unstage - Remove changes from the staging area
+
+SYNOPSIS
+--------
+[verse]
+'git unstage' [options] [--] [<pathspec>...]
+
+DESCRIPTION
+-----------
+
+Removes changes from the staging area. This is the same as `git reset`.
+
+SEE ALSO
+--------
+linkgit:git-reset[1]
+
+GIT
+---
+Part of the linkgit:git[1] suite

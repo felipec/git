@@ -13,6 +13,11 @@ static const char *const stage_usage[] = {
 	NULL
 };
 
+static const char *const unstage_usage[] = {
+	N_("git unstage [options] [--] [<pathspec>...]"),
+	NULL
+};
+
 static int rerun(struct child_process *cmd, const char **argv, const char *prefix)
 {
 	strvec_pushv(&cmd->args, argv);
@@ -40,6 +45,19 @@ int cmd_stage(int argc, const char **argv, const char *prefix)
 		strvec_push(&cmd.args, "reset");
 	else
 		strvec_push(&cmd.args, "add");
+
+	return rerun(&cmd, argv, prefix);
+}
+
+int cmd_unstage(int argc, const char **argv, const char *prefix)
+{
+	struct child_process cmd = CHILD_PROCESS_INIT;
+	struct option options[] = { OPT_END() };
+
+	argc = parse_options(argc, argv, prefix, options, unstage_usage,
+		PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_DASHDASH);
+
+	strvec_push(&cmd.args, "reset");
 
 	return rerun(&cmd, argv, prefix);
 }
