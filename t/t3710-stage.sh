@@ -17,4 +17,10 @@ test_expect_success 'basic' '
 	in_stage foo
 '
 
+test_expect_success 'add' '
+	touch bar &&
+	git stage --add bar &&
+	in_stage bar
+'
+
 test_done

@@ -8,6 +8,7 @@
 
 static const char *const stage_usage[] = {
 	N_("git stage [options] [--] [<pathspec>...]"),
+	N_("git stage (-a | --add) [options] [--] [<pathspec>...]"),
 	NULL
 };
 
@@ -23,7 +24,10 @@ static int rerun(struct child_process *cmd, const char **argv, const char *prefi
 int cmd_stage(int argc, const char **argv, const char *prefix)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
+	int add = 0;
+
 	struct option options[] = {
+		OPT_BOOL_F('a', "add", &add, N_("add changes"), PARSE_OPT_NONEG),
 		OPT_END()
 	};
 

@@ -3,19 +3,28 @@ git-stage(1)
 
 NAME
 ----
-git-stage - Add file contents to the staging area
+git-stage - Manage the staging area
 
 SYNOPSIS
 --------
 [verse]
 'git stage' [options] [--] [<pathspec>...]
+'git stage' (-a | --add) [options] [--] [<pathspec>...]
 
 DESCRIPTION
 -----------
 
-The staging area is a location where changes are stored in preparation for a commit.
+This command is useful to manage the staging area which is a location where
+changes are stored in preparation for a commit.
 
-This is a synonym for linkgit:git-add[1].
+Without arguments it's a synonym for linkgit:git-add[1].
+
+OPTIONS
+-------
+
+-a::
+--add::
+	Add changes to the staging area. See linkgit:git-add[1].
 
 SEE ALSO
 --------
