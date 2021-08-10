@@ -10,6 +10,7 @@ SYNOPSIS
 [verse]
 'git stage' [options] [--] [<pathspec>...]
 'git stage' (-a | --add) [options] [--] [<pathspec>...]
+'git stage' (-r | --remove) [options] [--] [<pathspec>...]
 
 DESCRIPTION
 -----------
@@ -26,9 +27,14 @@ OPTIONS
 --add::
 	Add changes to the staging area. See linkgit:git-add[1].
 
+-r::
+--remove::
+	Remove changes from the staging area. See linkgit:git-reset[1].
+
 SEE ALSO
 --------
 linkgit:git-add[1]
+linkgit:git-reset[1]
 
 GIT
 ---

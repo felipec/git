@@ -23,4 +23,9 @@ test_expect_success 'add' '
 	in_stage bar
 '
 
+test_expect_success 'remove' '
+	git stage --remove bar &&
+	! in_stage bar
+'
+
 test_done
