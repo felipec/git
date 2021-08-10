@@ -11,6 +11,7 @@ SYNOPSIS
 'git stage' [options] [--] [<pathspec>...]
 'git stage' (-a | --add) [options] [--] [<pathspec>...]
 'git stage' (-r | --remove) [options] [--] [<pathspec>...]
+'git stage' (-d | --diff) [options] [<commit>] [--] [<pathspec>...]
 
 DESCRIPTION
 -----------
@@ -31,10 +32,15 @@ OPTIONS
 --remove::
 	Remove changes from the staging area. See linkgit:git-reset[1].
 
+-d::
+--diff::
+	View the changes staged for the next commit. See linkgit:git-diff[1].
+
 SEE ALSO
 --------
 linkgit:git-add[1]
 linkgit:git-reset[1]
+linkgit:git-diff[1]
 
 GIT
 ---

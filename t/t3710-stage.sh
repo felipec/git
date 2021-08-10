@@ -35,4 +35,11 @@ test_expect_success 'unstage' '
 	! in_stage bar
 '
 
+test_expect_success 'diff' '
+	echo foo > foo &&
+	git stage --add foo &&
+	git stage --diff > out &&
+	test_file_not_empty out
+'
+
 test_done

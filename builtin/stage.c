@@ -10,6 +10,7 @@ static const char *const stage_usage[] = {
 	N_("git stage [options] [--] [<pathspec>...]"),
 	N_("git stage (-a | --add) [options] [--] [<pathspec>...]"),
 	N_("git stage (-r | --remove) [options] [--] [<pathspec>...]"),
+	N_("git stage (-d | --diff) [options] [<commit>] [--] [<pathspec>...]"),
 	NULL
 };
 
@@ -30,11 +31,12 @@ static int rerun(struct child_process *cmd, const char **argv, const char *prefi
 int cmd_stage(int argc, const char **argv, const char *prefix)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
-	int add = 0, remove = 0;
+	int add = 0, remove = 0, diff = 0;
 
 	struct option options[] = {
 		OPT_BOOL_F('a', "add", &add, N_("add changes"), PARSE_OPT_NONEG),
 		OPT_BOOL_F('r', "remove", &remove, N_("remove changes"), PARSE_OPT_NONEG),
+		OPT_BOOL_F('d', "diff", &diff, N_("show changes"), PARSE_OPT_NONEG),
 		OPT_END()
 	};
 
@@ -43,6 +45,8 @@ int cmd_stage(int argc, const char **argv, const char *prefix)
 
 	if (remove)
 		strvec_push(&cmd.args, "reset");
+	else if (diff)
+		strvec_pushl(&cmd.args, "diff", "--staged", NULL);
 	else
 		strvec_push(&cmd.args, "add");
 
