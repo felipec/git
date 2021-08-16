@@ -1140,4 +1140,10 @@ test_expect_failure 'options with value' '
 	EOF
 '
 
+test_expect_success 'main sets correct __git_cmd_idx' '
+	echo modified > file1 &&
+	touch file3 &&
+	test_completion "compdef _git ga=git_add${LF}ga --update f" "file1"
+'
+
 test_done
