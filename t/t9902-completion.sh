@@ -2689,4 +2689,13 @@ test_expect_success '__git_complete' '
 	test_must_fail __git_complete ga missing
 '
 
+test_expect_success '__git_complete has correct __git_cmd_idx' '
+	__git_complete ga _git_add &&
+	echo modified > file1 &&
+	touch file3 &&
+	_words=(ga --update f) _cword=2 &&
+	__git_wrap_git_add &&
+	test "${COMPREPLY[*]}" = "file1"
+'
+
 test_done
