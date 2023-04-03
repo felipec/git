@@ -48,4 +48,12 @@ test_expect_success 'edit' '
 	grep "^+edit$" out
 '
 
+test_expect_success 'prefix' '
+	touch topfile &&
+	mkdir subdir &&
+	cd subdir &&
+	git stage --add ../topfile &&
+	in_stage ../topfile
+'
+
 test_done
