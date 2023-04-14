@@ -2,7 +2,7 @@
 
 get_version () {
 	test -f version && cat version && return
-	git describe --match "v[0-9]*" --dirty 2>/dev/null | sed -e 's/-/./g' -e 's/^v//'
+	git describe --match "v[0-9]*" --dirty 2>/dev/null | sed -e 's/-/+/' -e 's/^v//'
 }
 
 V=$(get_version)
