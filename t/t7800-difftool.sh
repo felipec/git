@@ -13,6 +13,8 @@ export GIT_TEST_DEFAULT_INITIAL_BRANCH_NAME
 
 . ./test-lib.sh
 
+unset MERGE_TOOLS_DIR
+
 difftool_test_setup ()
 {
 	test_config diff.tool test-tool &&
