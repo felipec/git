@@ -42,8 +42,13 @@ test_expect_success 'diff' '
 	test_file_not_empty out
 '
 
+write_script fakeeditor <<-\EOF
+sed -e "s/^+foo$/+edit/" < "$1" > "$1-"
+mv "$1-" "$1"
+EOF
+
 test_expect_success 'edit' '
-	GIT_EDITOR="sed -i -e \"s/^+foo$/+edit/\"" git stage --edit &&
+	GIT_EDITOR="./fakeeditor" git stage --edit &&
 	git stage --diff > out &&
 	grep "^+edit$" out
 '
