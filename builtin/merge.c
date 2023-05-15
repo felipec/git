@@ -1157,6 +1157,7 @@ static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *mer
 	opts.shortlog_len = shortlog_len;
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
+	opts.reverse_parents = reverse_parents;
 
 	fmt_merge_msg(merge_names, merge_msg, &opts);
 	if (merge_msg->len)
