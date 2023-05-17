@@ -1012,22 +1012,6 @@ static int already_up_to_date(struct object_id *orig_head,
 	return 1;
 }
 
-static void show_advice_pull_non_ff(void)
-{
-	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
-		 "You can do so by running one of the following commands sometime before\n"
-		 "your next pull:\n"
-		 "\n"
-		 "  git config pull.mode merge\n"
-		 "  git config pull.mode rebase\n"
-		 "  git config pull.mode fast-forward\n"
-		 "\n"
-		 "You can replace \"git config\" with \"git config --global\" to set a default\n"
-		 "preference for all repositories. You can also pass --rebase, --merge,\n"
-		 "or --ff-only on the command line to override the configured default per\n"
-		 "invocation.\n"));
-}
-
 int cmd_pull(int argc, const char **argv, const char *prefix)
 {
 	const char *repo, **refspecs;
@@ -1169,14 +1153,8 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	can_ff = get_can_ff(&orig_head, &merge_heads);
 	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
-	if (mode == PULL_MODE_FAST_FORWARD && divergent)
+	if ((!mode || mode == PULL_MODE_FAST_FORWARD) && divergent)
 		die_ff_impossible();
-
-	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_rebase && divergent) {
-		show_advice_pull_non_ff();
-		die(_("Need to specify how to reconcile divergent branches."));
-	}
 
 	if (opt_rebase >= REBASE_TRUE) {
 		struct object_id newbase;
