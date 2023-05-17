@@ -1019,7 +1019,6 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	struct object_id orig_head, curr_head;
 	struct object_id rebase_fork_point;
 	int can_ff;
-	int divergent;
 	int ret;
 
 	opt_ff = xstrdup_or_null(config_get_ff());
@@ -1151,9 +1150,9 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	}
 
 	can_ff = get_can_ff(&orig_head, &merge_heads);
-	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
-	if ((!mode || mode == PULL_MODE_FAST_FORWARD) && divergent)
+	if ((!mode || mode == PULL_MODE_FAST_FORWARD) && !can_ff &&
+		!already_up_to_date(&orig_head, &merge_heads))
 		die_ff_impossible();
 
 	if (opt_rebase >= REBASE_TRUE) {
