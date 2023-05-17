@@ -260,12 +260,12 @@ test_expect_success '--ff-only takes precedence over pull.rebase=false' '
 	test_attempts_fast_forward -c pull.rebase=false pull --ff-only
 '
 
-test_expect_success '--no-rebase takes precedence over pull.ff=only' '
-	test_falls_back_to_full_merge -c pull.ff=only pull --no-rebase
+test_expect_success 'pull.ff=only takes precedence over --no-rebase' '
+	test_attempts_fast_forward -c pull.ff=only pull --no-rebase
 '
 
-test_expect_success '--rebase takes precedence over pull.ff=only' '
-	test_does_rebase -c pull.ff=only pull --rebase
+test_expect_success 'pull.ff=only takes precedence over --rebase' '
+	test_attempts_fast_forward -c pull.ff=only pull --rebase
 '
 
 test_expect_success '--rebase overrides pull.ff=true' '
