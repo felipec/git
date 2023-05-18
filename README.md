@@ -9,6 +9,39 @@ with git-fc and you wouldn't notice any missing feature, only extra features.
 
 ## Extra features
 
+### New 'git stage' command
+
+Absolutely everyone in the Git community has agreed that the term "the index"
+does not people understand what it is and how it is used. Everyone except Junio
+Hamano.
+
+This is particularly true of newcomers, which is why everyone that teaches git
+uses the term "staging area", and that includes tutorials, and even the Pro Git
+book.
+
+There is absolutely no reason not to use the term "staging area".
+
+As a first step a new command is introduced: `git stage`.
+
+Junio's git already has a `git stage` command, but it's just an alias for `git
+add`.
+
+The new command adds new options, for example:
+
+ * git stage --remove
+ * git stage --diff
+ * git stage --edit
+
+`git stage --remove` is essentially the same as `git reset --mixed`,
+`git stage --diff` is the same as `git diff --cached`, but `git stage --edit` is
+something that cannot be achieved in Junio's git: allows you to edit the patch
+directly.
+
+Additionally, a new `git unstage` command is introduced, again: the same as
+`git reset --mixed`.
+
+Blog post: [The git staging area, the term literally everyone agrees with](https://felipec.wordpress.com/2021/08/10/git-staging-area-rename/).
+
 ### New 'git update' command
 
 Everybody has agreed the `git pull` command is broken for most use-cases, which
@@ -40,7 +73,6 @@ these are almost ready, others still need a lot more work:
 
  * Publish branch
  * Default aliases
- * Official staging area
  * Better branch --list
  * New fetch.default configuration
 
