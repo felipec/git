@@ -1,25 +1,11 @@
 # git-fc
 
-git-fc is a friendly fork of git, which means it's a fork that won't deviate
-from the mainline; it is more like a branch in git terms. This branch will move
-forward close to git's mainline, and it could be merged at any point in time,
-if the maintainer wished to do so.
+git-fc is a fork of Junio Hamano's git.
 
 git-fc doesn't include experimental code, or half-assed features, so you can
 expect the same level of stability as git's mainline. Also, it doesn't remove
 any feature, or do any backwards incompatible changes, so you can replace git
 with git-fc and you wouldn't notice any missing feature, only extra features.
-
-## Maintenance
-
-Each release of git is merged directly into git-fc, so if there's a new feature
-in git, git-fc will get it as well.
-
-Every extra feature is maintained individually in a separate branch, so if you
-are interested in a specific feature and don't trust the rest of git-fc, you can
-use that branch instead. For example the publish branch feature is maintained in
-the 'fc/publish' branch which sits on top of git.git's v2.32. You can grab the
-specific branch and do whatever you want with it.
 
 ## Extra features
 
