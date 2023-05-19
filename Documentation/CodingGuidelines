@@ -245,9 +245,6 @@ For C programs:
      See the 33665d98 (reftable: make assignments portable to AIX xlc
      v12.01, 2022-03-28).
 
- - Variables have to be declared at the beginning of the block, before
-   the first statement (i.e. -Wdeclaration-after-statement).
-
  - NULL pointers shall be written as NULL, not as 0.
 
  - When declaring pointers, the star sides with the variable
