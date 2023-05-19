@@ -522,6 +522,11 @@ static void read_config(struct repository *repo)
 	alias_all_urls(repo->remote_state);
 }
 
+void remote_read_config(struct repository *repo)
+{
+	read_config(repo);
+}
+
 static int valid_remote_nick(const char *name)
 {
 	if (!name[0] || is_dot_or_dotdot(name))

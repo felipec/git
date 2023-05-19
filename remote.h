@@ -112,6 +112,8 @@ struct remote {
 	char *http_proxy_authmethod;
 };
 
+void remote_read_config(struct repository *repo);
+
 /**
  * struct remotes can be found by name with remote_get().
  * remote_get(NULL) will return the default remote, given the current branch
