@@ -289,7 +289,7 @@ static int remote_ref_atom_parser(struct ref_format *format, struct used_atom *a
 	struct string_list params = STRING_LIST_INIT_DUP;
 	int i;
 
-	if (!strcmp(atom->name, "push") || starts_with(atom->name, "push:"))
+	if (starts_with(atom->name, "push"))
 		atom->u.remote_ref.push = 1;
 
 	if (starts_with(atom->name, "publish"))
