@@ -175,7 +175,7 @@ process_diffs () {
 	' "$ZERO_OID" <"$1"
 }
 
-V=$(git version | sed -e 's/^git version //' -e 's/\./\\./g')
+V=$(git version | sed -e 's/^git-fc version //' -e 's/\./\\./g')
 while read magic cmd
 do
 	status=success

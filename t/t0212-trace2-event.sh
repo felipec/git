@@ -24,7 +24,7 @@ PATH="$TTDIR:$PATH" && export PATH
 # Warning: So you may see extra lines in artifact files when
 # Warning: interactively debugging.
 
-V=$(git version | sed -e 's/^git version //') && export V
+V=$(git version | sed -e 's/^git-fc version //') && export V
 
 # There are multiple trace2 targets: normal, perf, and event.
 # Trace2 events will/can be written to each active target (subject
