@@ -61,12 +61,12 @@ test_expect_success 'branch -v' '
 '
 
 cat >expect <<\EOF
-b1 [origin/main: ahead 1, behind 1] d
-b2 [origin/main: ahead 1, behind 1] d
-b3 [origin/main: behind 1] b
-b4 [origin/main: ahead 2] f
-b5 [brokenbase: gone] g
-b6 [origin/main] c
+b1 [origin/main<>] d
+b2 [origin/main<>] d
+b3 [origin/main<] b
+b4 [origin/main>] f
+b5 [brokenbase] g
+b6 [origin/main=] c
 EOF
 
 test_expect_success 'branch -vv' '

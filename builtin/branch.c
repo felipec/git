@@ -390,7 +390,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)[%s%%(upstream:short)%s%%(end)",
 			    branch_get_color(BRANCH_COLOR_UPSTREAM), branch_get_color(BRANCH_COLOR_RESET));
 		if (filter->verbose > 1)
-			strbuf_addf(&local, "%%(if)%%(upstream:track)%%(then): %%(upstream:track,nobracket)%%(end)");
+			strbuf_addf(&local, "%%(upstream:trackshort)");
 		strbuf_addf(&local, "%%(if)%%(upstream)%%(then)] %%(end)");
 		strbuf_addf(&local, "%%(contents:subject)");
 
