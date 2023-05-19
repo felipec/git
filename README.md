@@ -65,15 +65,59 @@ pull` that has no solution except not using this command.
 
 Blog post: [git update: the odyssey for a sensible git pull](https://felipec.wordpress.com/2021/07/05/git-update/).
 
+### Publish tracking branch
+
+Git mainline doesn't have the greatest support for triangular workflows, a good
+solution for that is to introduce a second "upstream" tracking branch which is
+for the reverse: the branch you normally push to.
+
+Say you clone a repository `libgit2` in GitHub, then create a branch
+`feature-a` and push it to your personal repository. You would want to track
+two branches: `origin/master` and `mine/feature-a`, but Junio's git only
+provides support for a **single** upstream tracking branch.
+
+If you setup your upstream tracking branch to `origin/master`, then you can
+just do `git rebase` without arguments and git will pick the right branch
+(`origin/master`) to rebase to. However, `git push` by default will also try to
+push to 'origin/master', which is not what you want. Plus `git branch -v` will
+show how ahead/behind your branch is compared to `origin/master`, not
+`mine/feature-a`.
+
+If you set up your upstream to `mine/feature-a`, then `git push` will work, but
+`git rebase` won't.
+
+With this new publish feature, `git rebase` uses the _upstream_ branch, and `git
+push` uses the _publish_ branch.
+
+Setting the upstream tracking branch is easy:
+
+    git push --set-publish mine feature-a
+
+Or:
+
+    git branch --set-publish mine/feature-a
+
+And `git branch -v` will show it as well:
+
+```
+  branch/fast      ... [master, gh/branch/fast] ...
+  stage            ... [master, gh/stage] ...
+  transport/improv ... [master, gh/transport/improv] ...
+```
+
+Another advantage of this assymetry is that `git branch -vv` can show separate
+ahead and behind markers, for example behind master (`master<`) and ahead of
+mine/feature-a (`mine/feature-a>`).
+
+This is how triangular workflow support should be implemented.
+
 ### Pending
 
 A previous instance of git-fc had more features but I've decided to re-start
 from scracth, therefore not all the features are available right now. Some of
 these are almost ready, others still need a lot more work:
 
- * Publish branch
  * Default aliases
- * Better branch --list
  * New fetch.default configuration
 
 ## Contributions
