@@ -114,6 +114,10 @@ struct remote {
 
 void remote_read_config(struct repository *repo);
 
+#define remote_for_each(r) \
+	remote_read_config(the_repository); \
+	for (int i = 0; i < the_repository->remote_state->remotes_nr; i++) if (((r) = the_repository->remote_state->remotes[i]))
+
 /**
  * struct remotes can be found by name with remote_get().
  * remote_get(NULL) will return the default remote, given the current branch
