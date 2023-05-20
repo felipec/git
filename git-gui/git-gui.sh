@@ -921,127 +921,6 @@ if {$_git eq {}} {
 
 ######################################################################
 ##
-## version check
-
-if {[catch {set _git_version [git --version]} err]} {
-	catch {wm withdraw .}
-	tk_messageBox \
-		-icon error \
-		-type ok \
-		-title [mc "git-gui: fatal error"] \
-		-message "Cannot determine Git version:
-
-$err
-
-[appname] requires Git 1.5.0 or later."
-	exit 1
-}
-if {![regsub {^git version } $_git_version {} _git_version]} {
-	catch {wm withdraw .}
-	tk_messageBox \
-		-icon error \
-		-type ok \
-		-title [mc "git-gui: fatal error"] \
-		-message [strcat [mc "Cannot parse Git version string:"] "\n\n$_git_version"]
-	exit 1
-}
-
-proc get_trimmed_version {s} {
-	set r {}
-	foreach x [split $s -._] {
-		if {[string is integer -strict $x]} {
-			lappend r $x
-		} else {
-			break
-		}
-	}
-	return [join $r .]
-}
-set _real_git_version $_git_version
-set _git_version [get_trimmed_version $_git_version]
-
-if {![regexp {^[1-9]+(\.[0-9]+)+$} $_git_version]} {
-	catch {wm withdraw .}
-	if {[tk_messageBox \
-		-icon warning \
-		-type yesno \
-		-default no \
-		-title "[appname]: warning" \
-		-message [mc "Git version cannot be determined.
-
-%s claims it is version '%s'.
-
-%s requires at least Git 1.5.0 or later.
-
-Assume '%s' is version 1.5.0?
-" $_git $_real_git_version [appname] $_real_git_version]] eq {yes}} {
-		set _git_version 1.5.0
-	} else {
-		exit 1
-	}
-}
-unset _real_git_version
-
-proc git-version {args} {
-	global _git_version
-
-	switch [llength $args] {
-	0 {
-		return $_git_version
-	}
-
-	2 {
-		set op [lindex $args 0]
-		set vr [lindex $args 1]
-		set cm [package vcompare $_git_version $vr]
-		return [expr $cm $op 0]
-	}
-
-	4 {
-		set type [lindex $args 0]
-		set name [lindex $args 1]
-		set parm [lindex $args 2]
-		set body [lindex $args 3]
-
-		if {($type ne {proc} && $type ne {method})} {
-			error "Invalid arguments to git-version"
-		}
-		if {[llength $body] < 2 || [lindex $body end-1] ne {default}} {
-			error "Last arm of $type $name must be default"
-		}
-
-		foreach {op vr cb} [lrange $body 0 end-2] {
-			if {[git-version $op $vr]} {
-				return [uplevel [list $type $name $parm $cb]]
-			}
-		}
-
-		return [uplevel [list $type $name $parm [lindex $body end]]]
-	}
-
-	default {
-		error "git-version >= x"
-	}
-
-	}
-}
-
-if {[git-version < 1.5]} {
-	catch {wm withdraw .}
-	tk_messageBox \
-		-icon error \
-		-type ok \
-		-title [mc "git-gui: fatal error"] \
-		-message "[appname] requires Git 1.5.0 or later.
-
-You are using [git-version]:
-
-[git --version]"
-	exit 1
-}
-
-######################################################################
-##
 ## configure our library
 
 set idx [file join $oguilib tclIndex]
@@ -1083,53 +962,30 @@ unset -nocomplain idx fd
 ##
 ## config file parsing
 
-git-version proc _parse_config {arr_name args} {
-	>= 1.5.3 {
-		upvar $arr_name arr
-		array unset arr
-		set buf {}
-		catch {
-			set fd_rc [eval \
-				[list git_read config] \
-				$args \
-				[list --null --list]]
-			fconfigure $fd_rc -translation binary -encoding utf-8
-			set buf [read $fd_rc]
-			close $fd_rc
-		}
-		foreach line [split $buf "\0"] {
-			if {[regexp {^([^\n]+)\n(.*)$} $line line name value]} {
-				if {[is_many_config $name]} {
-					lappend arr($name) $value
-				} else {
-					set arr($name) $value
-				}
-			} elseif {[regexp {^([^\n]+)$} $line line name]} {
-				# no value given, but interpreting them as
-				# boolean will be handled as true
-				set arr($name) {}
-			}
-		}
+proc _parse_config {arr_name args} {
+	upvar $arr_name arr
+	array unset arr
+	set buf {}
+	catch {
+		set fd_rc [eval \
+			[list git_read config] \
+			$args \
+			[list --null --list]]
+		fconfigure $fd_rc -translation binary -encoding utf-8
+		set buf [read $fd_rc]
+		close $fd_rc
 	}
-	default {
-		upvar $arr_name arr
-		array unset arr
-		catch {
-			set fd_rc [eval [list git_read config --list] $args]
-			while {[gets $fd_rc line] >= 0} {
-				if {[regexp {^([^=]+)=(.*)$} $line line name value]} {
-					if {[is_many_config $name]} {
-						lappend arr($name) $value
-					} else {
-						set arr($name) $value
-					}
-				} elseif {[regexp {^([^=]+)$} $line line name]} {
-					# no value given, but interpreting them as
-					# boolean will be handled as true
-					set arr($name) {}
-				}
+	foreach line [split $buf "\0"] {
+		if {[regexp {^([^\n]+)\n(.*)$} $line line name value]} {
+			if {[is_many_config $name]} {
+				lappend arr($name) $value
+			} else {
+				set arr($name) $value
 			}
-			close $fd_rc
+		} elseif {[regexp {^([^\n]+)$} $line line name]} {
+			# no value given, but interpreting them as
+			# boolean will be handled as true
+			set arr($name) {}
 		}
 	}
 }
@@ -1271,23 +1127,10 @@ if {![file isdirectory $_gitdir]} {
 load_config 0
 apply_config
 
-# v1.7.0 introduced --show-toplevel to return the canonical work-tree
-if {[package vcompare $_git_version 1.7.0] >= 0} {
-	if { [is_Cygwin] } {
-		catch {set _gitworktree [exec cygpath --windows [git rev-parse --show-toplevel]]}
-	} else {
-		set _gitworktree [git rev-parse --show-toplevel]
-	}
+if { [is_Cygwin] } {
+	catch {set _gitworktree [exec cygpath --windows [git rev-parse --show-toplevel]]}
 } else {
-	# try to set work tree from environment, core.worktree or use
-	# cdup to obtain a relative path to the top of the worktree. If
-	# run from the top, the ./ prefix ensures normalize expands pwd.
-	if {[catch { set _gitworktree $env(GIT_WORK_TREE) }]} {
-		set _gitworktree [get_config core.worktree]
-		if {$_gitworktree eq ""} {
-			set _gitworktree [file normalize ./[git rev-parse --show-cdup]]
-		}
-	}
+	set _gitworktree [git rev-parse --show-toplevel]
 }
 
 if {$_prefix ne {}} {
@@ -1531,18 +1374,7 @@ proc rescan_stage2 {fd after} {
 		close $fd
 	}
 
-	if {[package vcompare $::_git_version 1.6.3] >= 0} {
-		set ls_others [list --exclude-standard]
-	} else {
-		set ls_others [list --exclude-per-directory=.gitignore]
-		if {[have_info_exclude]} {
-			lappend ls_others "--exclude-from=[gitdir info exclude]"
-		}
-		set user_exclude [get_config core.excludesfile]
-		if {$user_exclude ne {} && [file readable $user_exclude]} {
-			lappend ls_others "--exclude-from=[file normalize $user_exclude]"
-		}
-	}
+	set ls_others [list --exclude-standard]
 
 	set buf_rdi {}
 	set buf_rdf {}
@@ -1550,11 +1382,7 @@ proc rescan_stage2 {fd after} {
 
 	set rescan_active 2
 	ui_status [mc "Scanning for modified files ..."]
-	if {[git-version >= "1.7.2"]} {
-		set fd_di [git_read diff-index --cached --ignore-submodules=dirty -z [PARENT]]
-	} else {
-		set fd_di [git_read diff-index --cached -z [PARENT]]
-	}
+	set fd_di [git_read diff-index --cached --ignore-submodules=dirty -z [PARENT]]
 	set fd_df [git_read diff-files -z]
 
 	fconfigure $fd_di -blocking 0 -translation binary -encoding binary
