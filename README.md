@@ -3,17 +3,17 @@
 git-fc is a fork of Junio Hamano's git.
 
 git-fc doesn't include experimental code, or half-assed features, so you can
-expect the same level of stability as git's mainline. Also, it doesn't remove
-any feature, or do any backwards incompatible changes, so you can replace git
-with git-fc and you wouldn't notice any missing feature, only extra features.
+expect the same level of stability as Junio's git. Also, it doesn't remove any
+feature, or do any backwards incompatible changes, so you can replace `git` with
+`git-fc` and you wouldn't notice any missing feature, only extra features.
 
 ## Extra features
 
 ### New 'git stage' command
 
 Absolutely everyone in the Git community has agreed that the term "the index"
-does not people understand what it is and how it is used. Everyone except Junio
-Hamano.
+does not help people understand what it is and how it is used. Everyone except
+Junio Hamano.
 
 This is particularly true of newcomers, which is why everyone that teaches git
 uses the term "staging area", and that includes tutorials, and even the Pro Git
@@ -28,9 +28,9 @@ add`.
 
 The new command adds new options, for example:
 
- * git stage --remove
- * git stage --diff
- * git stage --edit
+ * `git stage --remove`
+ * `git stage --diff`
+ * `git stage --edit`
 
 `git stage --remove` is essentially the same as `git reset --mixed`,
 `git stage --diff` is the same as `git diff --cached`, but `git stage --edit` is
@@ -59,15 +59,15 @@ the behavior everyone has agreed is the best.
 This ensures that new users won't be making merges by mistake.
 
 Additionally, when doing a merge the order of the parents is reversed, so the
-local branch is merged to the remote one, and not the other way around like `git
-pull` does. Again: everyone has agreed this is serious a problem with `git
-pull` that has no solution except not using this command.
+local branch is merged to the remote one, and not the other way around like
+`git pull` does. Again: everyone has agreed this is serious a problem with
+`git pull` that has no solution except avoiding this command.
 
 Blog post: [git update: the odyssey for a sensible git pull](https://felipec.wordpress.com/2021/07/05/git-update/).
 
 ### Publish tracking branch
 
-Git mainline doesn't have the greatest support for triangular workflows, a good
+Junio's git doesn't have the greatest support for triangular workflows. A good
 solution for that is to introduce a second "upstream" tracking branch which is
 for the reverse: the branch you normally push to.
 
@@ -86,8 +86,8 @@ show how ahead/behind your branch is compared to `origin/master`, not
 If you set up your upstream to `mine/feature-a`, then `git push` will work, but
 `git rebase` won't.
 
-With this new publish feature, `git rebase` uses the _upstream_ branch, and `git
-push` uses the _publish_ branch.
+With this new publish feature, `git rebase` uses the _upstream_ branch, and
+`git push` uses the _publish_ branch.
 
 Setting the upstream tracking branch is easy:
 
@@ -105,7 +105,7 @@ And `git branch -v` will show it as well:
   transport/improv ... [master, gh/transport/improv] ...
 ```
 
-Another advantage of this assymetry is that `git branch -vv` can show separate
+Another advantage of this asymmetry is that `git branch -vv` can show separate
 ahead and behind markers, for example behind master (`master<`) and ahead of
 mine/feature-a (`mine/feature-a>`).
 
@@ -114,7 +114,7 @@ This is how triangular workflow support should be implemented.
 ### Pending
 
 A previous instance of git-fc had more features but I've decided to re-start
-from scracth, therefore not all the features are available right now. Some of
+from scratch, therefore not all the features are available right now. Some of
 these are almost ready, others still need a lot more work:
 
  * Default aliases
