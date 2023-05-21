@@ -14,7 +14,8 @@ else
 	exit 0
 fi
 
-export ZDOTDIR="${0:h:a}/t9904"
+ZDOTDIR="${0:h:a}/t9904"
+export ZDOTDIR
 
 . ./test-lib.sh
 
@@ -22,7 +23,8 @@ emulate zsh
 
 zmodload zsh/zpty
 
-export SRC_DIR="$GIT_BUILD_DIR/contrib/completion/"
+SRC_DIR="$GIT_BUILD_DIR/contrib/completion/"
+export SRC_DIR
 
 run_completion ()
 {
