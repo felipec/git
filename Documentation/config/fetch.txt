@@ -120,3 +120,10 @@ fetch.bundleCreationToken::
 The creation token values are chosen by the provider serving the specific
 bundle URI. If you modify the URI at `fetch.bundleURI`, then be sure to
 remove the value for the `fetch.bundleCreationToken` value before fetching.
+
+fetch.default::
+	Defines the action `git fetch` should take if no remote is specified
+	on the command line and the upstream branch is local. Possible values are:
++
+* `current` - consider '.' as a valid remote
+* `sane` - consider '.' as an invalid remote

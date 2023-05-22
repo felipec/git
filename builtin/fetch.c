@@ -128,6 +128,18 @@ static int git_fetch_config(const char *k, const char *v, void *cb)
 		return 0;
 	}
 
+	if (!strcmp(k, "fetch.default")) {
+		if (!v)
+			return config_error_nonbool(k);
+		else if (!strcmp(v, "sane"))
+			fetch_default = FETCH_DEFAULT_SANE;
+		else if (!strcmp(v, "current"))
+			fetch_default = FETCH_DEFAULT_CURRENT;
+		else
+			return error(_("malformed value for '%s': '%s'"), k, v);
+		return 0;
+	}
+
 	return git_default_config(k, v, cb);
 }
 

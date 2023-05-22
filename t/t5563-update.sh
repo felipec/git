@@ -7,6 +7,8 @@ export GIT_TEST_DEFAULT_INITIAL_BRANCH_NAME
 
 . ./test-lib.sh
 
+git config --global fetch.default current
+
 check_msg () {
 	test "$2" != "master" && into=" into '$2'"
 	echo "Merge branch '$1'${into}" > expected

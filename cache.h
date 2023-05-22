@@ -1098,8 +1098,15 @@ enum push_default_type {
 	PUSH_DEFAULT_UNSPECIFIED
 };
 
+enum fetch_default_type {
+	FETCH_DEFAULT_DEFAULT = 0,
+	FETCH_DEFAULT_CURRENT,
+	FETCH_DEFAULT_SANE,
+};
+
 extern enum rebase_setup_type autorebase;
 extern enum push_default_type push_default;
+extern enum fetch_default_type fetch_default;
 
 enum object_creation_mode {
 	OBJECT_CREATION_USES_HARDLINKS = 0,

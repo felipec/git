@@ -119,7 +119,7 @@ test_expect_success 'test . as a remote' '
 	git checkout copy &&
 	echo file >expect &&
 	test_cmp expect file &&
-	git pull &&
+	git -c fetch.default=current pull &&
 	echo updated >expect &&
 	test_cmp expect file &&
 	git reflog -1 >reflog.actual &&
