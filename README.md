@@ -111,14 +111,16 @@ mine/feature-a (`mine/feature-a>`).
 
 This is how triangular workflow support should be implemented.
 
-### Pending
+## Other
 
-A previous instance of git-fc had more features but I've decided to re-start
-from scratch, therefore not all the features are available right now. Some of
-these are almost ready, others still need a lot more work:
+There's many other improvements that have been accumulating through the years:
 
- * Default aliases
- * New fetch.default configuration
+ * `fetch.default=sane` fetches a proper default instead of '.'
+ * `push.default=simple` is fixed
+ * shell completions are much improved
+
+There's many more improvements pending that I implemented in the past, but
+haven't had the time to properly port them.
 
 ## Contributions
 
