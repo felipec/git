@@ -342,6 +342,59 @@ cleanup:
 	string_list_clear(&ftb_cb.ambiguous_remotes, 0);
 }
 
+int install_branch_publish(const char *local, const char *origin, const char *remote)
+{
+	const char *shortname = NULL;
+	struct strbuf key = STRBUF_INIT;
+
+	if (!origin && skip_prefix(remote, "refs/heads/", &shortname) &&
+		!strcmp(local, shortname))
+	{
+		warning(_("Not setting branch %s as its own publish branch."),
+			local);
+		return 0;
+	}
+
+	strbuf_addf(&key, "branch.%s.pushremote", local);
+	if (git_config_set_gently(key.buf, origin ? origin : ".") < 0)
+		goto out_err;
+
+	strbuf_reset(&key);
+	strbuf_addf(&key, "branch.%s.push", local);
+	if (git_config_set_gently(key.buf, remote) < 0)
+		goto out_err;
+
+	strbuf_release(&key);
+
+	return 0;
+
+out_err:
+	strbuf_release(&key);
+	error(_("Unable to write publish branch configuration"));
+
+	return -1;
+}
+
+void setup_publish(const char *new_ref, const char *orig_ref)
+{
+	struct refspec_item spec = { .dst = (char *)orig_ref };
+	const char *remote_name = NULL;
+	const char *remote_ref = orig_ref;
+	struct remote *remote;
+
+	remote_for_each(remote) {
+		if (remote_find_tracking(remote, &spec))
+			continue;
+
+		remote_name = remote->name;
+		remote_ref = spec.src;
+		break;
+	}
+
+	if (install_branch_publish(new_ref, remote_name, remote_ref) < 0)
+		exit(-1);
+}
+
 int read_branch_desc(struct strbuf *buf, const char *branch_name)
 {
 	char *v = NULL;

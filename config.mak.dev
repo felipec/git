@@ -29,7 +29,6 @@ else
 # rely on C11 features.
 endif
 
-DEVELOPER_CFLAGS += -Wdeclaration-after-statement
 DEVELOPER_CFLAGS += -Wformat-security
 DEVELOPER_CFLAGS += -Wold-style-definition
 DEVELOPER_CFLAGS += -Woverflow

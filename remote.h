@@ -112,6 +112,12 @@ struct remote {
 	char *http_proxy_authmethod;
 };
 
+void remote_read_config(struct repository *repo);
+
+#define remote_for_each(r) \
+	remote_read_config(the_repository); \
+	for (int i = 0; i < the_repository->remote_state->remotes_nr; i++) if (((r) = the_repository->remote_state->remotes[i]))
+
 /**
  * struct remotes can be found by name with remote_get().
  * remote_get(NULL) will return the default remote, given the current branch
@@ -312,8 +318,12 @@ struct branch {
 
 	const char *pushremote_name;
 
+	struct refspec_item *upstream;
+
 	/* An array of the "merge" lines in the configuration. */
 	const char **merge_name;
+
+	const char *push_name;
 
 	/**
 	 * An array of the struct refspecs used for the merge lines. That is,
@@ -326,6 +336,8 @@ struct branch {
 	int merge_nr;
 
 	int merge_alloc;
+
+	struct refspec_item *push;
 
 	const char *push_tracking_ref;
 };
@@ -358,6 +370,8 @@ const char *branch_get_upstream(struct branch *branch, struct strbuf *err);
  * The return value and `err` conventions match those of `branch_get_upstream`.
  */
 const char *branch_get_push(struct branch *branch, struct strbuf *err);
+
+const char *branch_get_publish(struct branch *branch, struct strbuf *err);
 
 /* Flags to match_refs. */
 enum match_refs_flags {

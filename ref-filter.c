@@ -146,6 +146,7 @@ enum atom_type {
 	ATOM_CONTENTS,
 	ATOM_RAW,
 	ATOM_UPSTREAM,
+	ATOM_PUBLISH,
 	ATOM_PUSH,
 	ATOM_SYMREF,
 	ATOM_FLAG,
@@ -183,7 +184,7 @@ static struct used_atom {
 				RR_REF, RR_TRACK, RR_TRACKSHORT, RR_REMOTE_NAME, RR_REMOTE_REF
 			} option;
 			struct refname_atom refname;
-			unsigned int nobracket : 1, push : 1, push_remote : 1;
+			unsigned int nobracket : 1, push : 2, push_remote : 1;
 		} remote_ref;
 		struct {
 			enum { C_BARE, C_BODY, C_BODY_DEP, C_LENGTH, C_LINES,
@@ -288,8 +289,11 @@ static int remote_ref_atom_parser(struct ref_format *format, struct used_atom *a
 	struct string_list params = STRING_LIST_INIT_DUP;
 	int i;
 
-	if (!strcmp(atom->name, "push") || starts_with(atom->name, "push:"))
+	if (starts_with(atom->name, "push"))
 		atom->u.remote_ref.push = 1;
+
+	if (starts_with(atom->name, "publish"))
+		atom->u.remote_ref.push = 2;
 
 	if (!arg) {
 		atom->u.remote_ref.option = RR_REF;
@@ -633,6 +637,7 @@ static struct {
 	[ATOM_CONTENTS] = { "contents", SOURCE_OBJ, FIELD_STR, contents_atom_parser },
 	[ATOM_RAW] = { "raw", SOURCE_OBJ, FIELD_STR, raw_atom_parser },
 	[ATOM_UPSTREAM] = { "upstream", SOURCE_NONE, FIELD_STR, remote_ref_atom_parser },
+	[ATOM_PUBLISH] = { "publish", SOURCE_NONE, FIELD_STR, remote_ref_atom_parser },
 	[ATOM_PUSH] = { "push", SOURCE_NONE, FIELD_STR, remote_ref_atom_parser },
 	[ATOM_SYMREF] = { "symref", SOURCE_NONE, FIELD_STR, refname_atom_parser },
 	[ATOM_FLAG] = { "flag", SOURCE_NONE },
@@ -1701,9 +1706,13 @@ static void fill_remote_ref_details(struct used_atom *atom, const char *refname,
 			*s = xstrdup("<>");
 	} else if (atom->u.remote_ref.option == RR_REMOTE_NAME) {
 		int explicit;
-		const char *remote = atom->u.remote_ref.push ?
-			pushremote_for_branch(branch, &explicit) :
-			remote_for_branch(branch, &explicit);
+		const char *remote;
+		switch (atom->u.remote_ref.push) {
+		case 0: remote = remote_for_branch(branch, &explicit); break;
+		case 1: remote = pushremote_for_branch(branch, &explicit); break;
+		case 2: remote = branch->pushremote_name; explicit = 1; break;
+		default: return;
+		}
 		*s = xstrdup(explicit ? remote : "");
 	} else if (atom->u.remote_ref.option == RR_REMOTE_REF) {
 		const char *merge;
@@ -1922,6 +1931,21 @@ static int populate_value(struct ref_array_item *ref, struct strbuf *err)
 			/* We will definitely re-init v->s on the next line. */
 			free((char *)v->s);
 			fill_remote_ref_details(atom, refname, branch, &v->s);
+			continue;
+		} else if (atom_type == ATOM_PUBLISH) {
+			const char *branch_name;
+			if (!skip_prefix(ref->refname, "refs/heads/",
+					 &branch_name)) {
+				v->s = xstrdup("");
+				continue;
+			}
+			branch = branch_get(branch_name);
+
+			refname = branch_get_publish(branch, NULL);
+			if (refname)
+				fill_remote_ref_details(atom, refname, branch, &v->s);
+			else
+				v->s = xstrdup("");
 			continue;
 		} else if (atom_type == ATOM_COLOR) {
 			v->s = xstrdup(atom->u.color);

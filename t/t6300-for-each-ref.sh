@@ -37,7 +37,9 @@ test_expect_success setup '
 	git config branch.main.merge refs/heads/main &&
 	git remote add myfork elsewhere &&
 	git config remote.pushdefault myfork &&
-	git config push.default current
+	git config push.default current &&
+	git config branch.main.pushremote myfork &&
+	git config branch.main.push refs/heads/mymain
 '
 
 test_atom() {
@@ -115,6 +117,14 @@ test_atom head push:rstrip=1 refs/remotes/myfork
 test_atom head push:rstrip=-1 refs
 test_atom head push:strip=1 remotes/myfork/main
 test_atom head push:strip=-1 main
+test_atom head publish refs/remotes/myfork/mymain
+test_atom head publish:short myfork/mymain
+test_atom head publish:lstrip=1 remotes/myfork/mymain
+test_atom head publish:lstrip=-1 mymain
+test_atom head publish:rstrip=1 refs/remotes/myfork
+test_atom head publish:rstrip=-1 refs
+test_atom head publish:strip=1 remotes/myfork/mymain
+test_atom head publish:strip=-1 mymain
 test_atom head objecttype commit
 test_atom head objectsize $((131 + hexlen))
 test_atom head objectsize:disk $disklen
@@ -173,6 +183,7 @@ test_atom tag refname refs/tags/testtag
 test_atom tag refname:short testtag
 test_atom tag upstream ''
 test_atom tag push ''
+test_atom tag publish ''
 test_atom tag objecttype tag
 test_atom tag objectsize $((114 + hexlen))
 test_atom tag objectsize:disk $disklen
@@ -1343,12 +1354,16 @@ test_expect_success ':remotename and :remoteref' '
 		git remote add to southridge.audio:repo &&
 		git config remote.to.push "refs/heads/*:refs/heads/pushed/*" &&
 		git config branch.main.pushRemote to &&
+		git config branch.main.push refs/heads/publish-main &&
 		for pair in "%(upstream)=refs/remotes/from/stable" \
 			"%(upstream:remotename)=from" \
 			"%(upstream:remoteref)=refs/heads/stable" \
 			"%(push)=refs/remotes/to/pushed/main" \
 			"%(push:remotename)=to" \
-			"%(push:remoteref)=refs/heads/pushed/main"
+			"%(push:remoteref)=refs/heads/pushed/main" \
+			"%(publish)=refs/remotes/to/publish-main" \
+			"%(publish:remotename)=to" \
+			"%(publish:remoteref)=refs/heads/publish-main"
 		do
 			echo "${pair#*=}" >expect &&
 			git for-each-ref --format="${pair%=*}" \

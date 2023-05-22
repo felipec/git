@@ -1875,4 +1875,56 @@ test_expect_success 'push with config push.useBitmaps' '
 		--thin --delta-base-offset -q --no-use-bitmap-index <false
 '
 
+mk_publish_test () {
+	mk_test up_repo heads/main &&
+	mk_test down_repo heads/main &&
+	test_config remote.up.url up_repo &&
+	test_config remote.down.url down_repo &&
+	test_config branch.main.pushremote down &&
+	test_config branch.main.push for-john &&
+	test_config branch.main.remote up &&
+	test_config branch.main.merge main
+}
+
+# undo previous bullshit
+git reset --hard "$the_commit"
+
+test_expect_success 'push with publish branch' '
+	mk_publish_test &&
+	git push &&
+	check_push_result up_repo $the_first_commit heads/main &&
+	check_push_result down_repo $the_commit heads/for-john
+'
+
+test_expect_success 'push with publish branch for different remote' '
+	mk_publish_test &&
+	test_must_fail git push up &&
+	git push up HEAD:main &&
+	check_push_result up_repo $the_commit heads/main &&
+	check_push_result down_repo $the_first_commit heads/main
+'
+
+test_expect_success 'push with publish branch with pushdefault' '
+	mk_publish_test &&
+	test_config remote.pushdefault up &&
+	git push &&
+	check_push_result up_repo $the_first_commit heads/main &&
+	check_push_result down_repo $the_commit heads/for-john
+'
+
+test_expect_success 'push with publish branch with remote refspec' '
+	mk_publish_test &&
+	test_config remote.down.push refs/heads/main:refs/heads/bad &&
+	git push &&
+	check_push_result up_repo $the_first_commit heads/main &&
+	check_push_result down_repo $the_commit heads/for-john
+'
+
+test_expect_success 'push with publish branch with manual refspec' '
+	mk_publish_test &&
+	git push down main:good &&
+	check_push_result up_repo $the_first_commit heads/main &&
+	check_push_result down_repo $the_commit heads/good
+'
+
 test_done

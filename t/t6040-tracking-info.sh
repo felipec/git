@@ -35,20 +35,27 @@ test_expect_success setup '
 		git checkout -b b5 --track brokenbase &&
 		advance g &&
 		git branch -d brokenbase &&
-		git checkout -b b6 origin
+		git checkout -b b6 origin &&
+		git checkout -b b7 origin
 	) &&
 	git checkout -b follower --track main &&
-	advance h
+	advance h &&
+	(
+		cd test &&
+		git fetch &&
+		git branch -p origin/follower b7
+	)
 '
 
 t6040_script='s/^..\(b.\) *[0-9a-f]* \(.*\)$/\1 \2/p'
 cat >expect <<\EOF
-b1 [ahead 1, behind 1] d
-b2 [ahead 1, behind 1] d
-b3 [behind 1] b
-b4 [ahead 2] f
-b5 [gone] g
-b6 c
+b1 [origin/main] d
+b2 [origin/main] d
+b3 [origin/main] b
+b4 [origin/main] f
+b5 [brokenbase] g
+b6 [origin/main] c
+b7 [origin/main, origin/follower] c
 EOF
 
 test_expect_success 'branch -v' '
@@ -61,12 +68,13 @@ test_expect_success 'branch -v' '
 '
 
 cat >expect <<\EOF
-b1 [origin/main: ahead 1, behind 1] d
-b2 [origin/main: ahead 1, behind 1] d
-b3 [origin/main: behind 1] b
-b4 [origin/main: ahead 2] f
-b5 [brokenbase: gone] g
-b6 [origin/main] c
+b1 [origin/main<>] d
+b2 [origin/main<>] d
+b3 [origin/main<] b
+b4 [origin/main>] f
+b5 [brokenbase] g
+b6 [origin/main=] c
+b7 [origin/main=, origin/follower<] c
 EOF
 
 test_expect_success 'branch -vv' '

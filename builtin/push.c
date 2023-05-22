@@ -82,9 +82,9 @@ static void refspec_append_mapped(struct refspec *refspec, const char *ref,
 	if (push_default == PUSH_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
 		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		if (branch->merge_nr == 1 && branch->upstream->src) {
 			refspec_appendf(refspec, "%s:%s",
-					ref, branch->merge[0]->src);
+					ref, branch->upstream->src);
 			return;
 		}
 	}
@@ -160,7 +160,7 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 */
 	const char *advice_pushdefault_maybe = "";
 	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
+	const char *short_upstream = branch->upstream->src;
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -208,7 +208,7 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		return branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+	if (!branch->upstream || !branch->remote_name) {
 		const char *advice_autosetup_maybe = "";
 		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
@@ -231,7 +231,7 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	return branch->upstream->src;
 }
 
 static void setup_default_push_refspecs(int *flags, struct remote *remote)
@@ -438,7 +438,11 @@ static int do_push(int flags,
 		flags |= TRANSPORT_PUSH_OPTIONS;
 
 	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
+		struct branch *branch = branch_get(NULL);
+		/* Is there a publish branch */
+		if (branch && branch->pushremote_name && !strcmp(remote->name, branch->pushremote_name) && branch->push_name) {
+			refspec_appendf(push_refspec, "%s:%s", branch->refname, branch->push_name);
+		} else if (remote->push.nr) {
 			push_refspec = &remote->push;
 		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
 			setup_default_push_refspecs(&flags, remote);
@@ -615,6 +619,8 @@ int cmd_push(int argc, const char **argv, const char *prefix)
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
 			TRANSPORT_PUSH_SET_UPSTREAM),
+		OPT_BIT('p', "set-publish", &flags, N_("set publish for git pull/status"),
+			TRANSPORT_PUSH_SET_PUBLISH),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
 		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
 			TRANSPORT_PUSH_PRUNE),

@@ -871,6 +871,12 @@ static inline int upstream_mark(const char *string, int len)
 	return at_mark(string, len, suffix, ARRAY_SIZE(suffix));
 }
 
+static inline int publish_mark(const char *string, int len)
+{
+	const char *suffix[] = { "@{publish}", "@{p}" };
+	return at_mark(string, len, suffix, ARRAY_SIZE(suffix));
+}
+
 static inline int push_mark(const char *string, int len)
 {
 	const char *suffix[] = { "@{push}" };
@@ -925,6 +931,7 @@ static int get_oid_basic(struct repository *r, const char *str, int len,
 					continue;
 				}
 				if (!upstream_mark(str + at, len - at) &&
+				    !publish_mark(str + at, len - at) &&
 				    !push_mark(str + at, len - at)) {
 					reflog_len = (len-1) - (at+2);
 					len = at;
@@ -1646,6 +1653,12 @@ int repo_interpret_branch_name(struct repository *r,
 
 		len = interpret_branch_mark(r, name, namelen, at - name, buf,
 					    upstream_mark, branch_get_upstream,
+					    options);
+		if (len > 0)
+			return len;
+
+		len = interpret_branch_mark(r, name, namelen, at - name, buf,
+					    publish_mark, branch_get_publish,
 					    options);
 		if (len > 0)
 			return len;

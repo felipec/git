@@ -102,6 +102,11 @@ some output processing may assume ref names in UTF-8.
   `branch.<name>.remote`). B@{u} refers to the remote-tracking branch for
   the branch X taken from remote R, typically found at `refs/remotes/R/X`.
 
+'[<branchname>]@\{publish\}', e.g. 'master@\{publish\}', '@\{p\}'::
+  The suffix '@\{publish\}' to a branchname (short form '<branchname>@\{p\}')
+  refers to the branch that the branch specified by branchname is set to push to
+  (configured with `branch.<name>.pushremote` and `branch.<name>.push`).
+
 '[<branchname>]@\{push\}', e.g. 'master@\{push\}', '@\{push\}'::
   The suffix '@\{push}' reports the branch "where we would push to" if
   `git push` were run while `branchname` was checked out (or the current
