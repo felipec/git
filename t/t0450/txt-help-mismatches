@@ -51,7 +51,6 @@ reset
 restore
 rev-parse
 show
-stage
 switch
 update-index
 update-ref

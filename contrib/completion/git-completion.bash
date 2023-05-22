@@ -2393,6 +2393,11 @@ _git_send_email ()
 
 _git_stage ()
 {
+	if [[ "$cur" == --* ]]; then
+		__gitcomp_builtin stage
+		return
+	fi
+
 	_git_add
 }
 
