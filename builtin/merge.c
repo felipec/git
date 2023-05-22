@@ -62,6 +62,11 @@ static const char * const builtin_merge_usage[] = {
 	NULL
 };
 
+static const char * const builtin_ff_usage[] = {
+	N_("git fast-forward [<commit>]"),
+	NULL
+};
+
 static int show_diffstat = 1, shortlog_len = -1, squash;
 static int option_commit = -1;
 static int option_edit = -1;
@@ -88,6 +93,7 @@ static const char *sign_commit;
 static int autostash;
 static int no_verify;
 static char *into_name;
+static int reverse_parents;
 
 static struct strategy all_strategy[] = {
 	{ "recursive",  NO_TRIVIAL },
@@ -305,6 +311,12 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL(0, "overwrite-ignore", &overwrite_ignore, N_("update ignored files (default)")),
 	OPT_BOOL(0, "signoff", &signoff, N_("add a Signed-off-by trailer")),
 	OPT_BOOL(0, "no-verify", &no_verify, N_("bypass pre-merge-commit and commit-msg hooks")),
+	OPT_BOOL(0, "reverse-parents", &reverse_parents,
+		N_("reverse the order of parents")),
+	OPT_END()
+};
+
+static struct option builtin_ff_options[] = {
 	OPT_END()
 };
 
@@ -923,6 +935,8 @@ static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
 	pptr = commit_list_append(head, pptr);
 	pptr = commit_list_append(remoteheads->item, pptr);
 	prepare_to_commit(remoteheads);
+	if (reverse_parents)
+		parents = reverse_commit_list(parents);
 	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
 			&result_commit, NULL, sign_commit))
 		die(_("failed to write commit object"));
@@ -947,6 +961,8 @@ static int finish_automerge(struct commit *head,
 	parents = remoteheads;
 	if (!head_subsumed || fast_forward == FF_NO)
 		commit_list_insert(head, &parents);
+	if (reverse_parents)
+		parents = reverse_commit_list(parents);
 	prepare_to_commit(remoteheads);
 	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
 			&result_commit, NULL, sign_commit))
@@ -1060,7 +1076,9 @@ static void write_merge_heads(struct commit_list *remoteheads)
 
 	strbuf_reset(&buf);
 	if (fast_forward == FF_NO)
-		strbuf_addstr(&buf, "no-ff");
+		strbuf_addstr(&buf, "no-ff ");
+	if (reverse_parents)
+		strbuf_addstr(&buf, "reverse ");
 	write_file_buf(git_path_merge_mode(the_repository), buf.buf, buf.len);
 	strbuf_release(&buf);
 }
@@ -1139,6 +1157,7 @@ static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *mer
 	opts.shortlog_len = shortlog_len;
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
+	opts.reverse_parents = reverse_parents;
 
 	fmt_merge_msg(merge_names, merge_msg, &opts);
 	if (merge_msg->len)
@@ -1278,7 +1297,8 @@ static int merging_a_throwaway_tag(struct commit *commit)
 	return is_throwaway_tag;
 }
 
-int cmd_merge(int argc, const char **argv, const char *prefix)
+static int merge_common(int argc, const char **argv, const char *prefix,
+	const struct option *options, const char * const usage[])
 {
 	struct object_id result_tree, stash, head_oid;
 	struct commit *head_commit;
@@ -1292,7 +1312,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	int orig_argc = argc;
 
 	if (argc == 2 && !strcmp(argv[1], "-h"))
-		usage_with_options(builtin_merge_usage, builtin_merge_options);
+		usage_with_options(usage, options);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -1321,8 +1341,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 	if (branch_mergeoptions)
 		parse_branch_merge_options(branch_mergeoptions);
-	argc = parse_options(argc, argv, prefix, builtin_merge_options,
-			builtin_merge_usage, 0);
+	argc = parse_options(argc, argv, prefix, options, usage, 0);
 	if (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
@@ -1336,7 +1355,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 		if (orig_argc != 2)
 			usage_msg_opt(_("--abort expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+				usage, options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge to abort (MERGE_HEAD missing)."));
@@ -1358,8 +1377,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	if (quit_current_merge) {
 		if (orig_argc != 2)
 			usage_msg_opt(_("--quit expects no arguments"),
-				      builtin_merge_usage,
-				      builtin_merge_options);
+				usage, options);
 
 		remove_merge_branch_state(the_repository);
 		goto done;
@@ -1371,7 +1389,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 
 		if (orig_argc != 2)
 			usage_msg_opt(_("--continue expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+				usage, options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge in progress (MERGE_HEAD missing)."));
@@ -1438,8 +1456,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 	}
 
 	if (!argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+		usage_with_options(usage, options);
 
 	if (!head_commit) {
 		/*
@@ -1480,8 +1497,7 @@ int cmd_merge(int argc, const char **argv, const char *prefix)
 				      argc, argv, &merge_msg);
 
 	if (!head_commit || !argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+		usage_with_options(usage, options);
 
 	if (verify_signatures) {
 		for (p = remoteheads; p; p = p->next) {
@@ -1789,4 +1805,15 @@ done:
 	free(branch_to_free);
 	discard_index(&the_index);
 	return ret;
+}
+
+int cmd_merge(int argc, const char **argv, const char *prefix)
+{
+	return merge_common(argc, argv, prefix, builtin_merge_options, builtin_merge_usage);
+}
+
+int cmd_fast_forward(int argc, const char **argv, const char *prefix)
+{
+	fast_forward = FF_ONLY;
+	return merge_common(argc, argv, prefix, builtin_ff_options, builtin_ff_usage);
 }

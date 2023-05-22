@@ -28,6 +28,8 @@
 #include "sequencer.h"
 #include "packfile.h"
 
+static enum pull_mode_type mode;
+
 /**
  * Parses the value of --rebase. If value is a false value, returns
  * REBASE_FALSE. If value is a true value, returns REBASE_TRUE. If value is
@@ -49,6 +51,14 @@ static enum rebase_type parse_config_rebase(const char *key, const char *value,
 	return REBASE_INVALID;
 }
 
+static enum pull_mode_type parse_config_pull_mode(const char *key, const char *value)
+{
+	enum pull_mode_type v = pull_mode_parse_value(value);
+	if (v == PULL_MODE_INVALID)
+		die(_("Invalid value for %s: %s"), key, value);
+	return v;
+}
+
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
@@ -58,9 +68,27 @@ static int parse_opt_rebase(const struct option *opt, const char *arg, int unset
 
 	if (arg)
 		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
+	else {
+		if (!unset) {
+			/* --rebase shouldn't override pull.rebase=merges (and others) */
+			if (*value < REBASE_TRUE)
+				*value = REBASE_TRUE;
+		} else
+			*value = REBASE_FALSE;
+	}
+
+	if (*value > 0)
+		mode = *value >= REBASE_TRUE ? PULL_MODE_REBASE : PULL_MODE_MERGE;
+
 	return *value == REBASE_INVALID ? -1 : 0;
+}
+
+static int parse_opt_merge(const struct option *opt, const char *arg, int unset)
+{
+	enum rebase_type *value = opt->value;
+	mode = PULL_MODE_MERGE;
+	*value = REBASE_FALSE;
+	return 0;
 }
 
 static const char * const pull_usage[] = {
@@ -75,7 +103,7 @@ static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
 static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
+static enum rebase_type opt_rebase;
 static char *opt_diffstat;
 static char *opt_log;
 static char *opt_signoff;
@@ -131,6 +159,9 @@ static struct option pull_options[] = {
 		"(false|true|merges|interactive)",
 		N_("incorporate changes by rebasing rather than merging"),
 		PARSE_OPT_OPTARG, parse_opt_rebase),
+	OPT_CALLBACK_F('m', "merge", &opt_rebase, NULL,
+		N_("incorporate changes by merging"),
+		PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_merge),
 	OPT_PASSTHRU('n', NULL, &opt_diffstat, NULL,
 		N_("do not show a diffstat at the end of the merge"),
 		PARSE_OPT_NOARG | PARSE_OPT_NONEG),
@@ -329,7 +360,7 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+static enum rebase_type config_get_rebase(void)
 {
 	struct branch *curr_branch = branch_get("HEAD");
 	const char *value;
@@ -349,9 +380,30 @@ static enum rebase_type config_get_rebase(int *rebase_unspecified)
 	if (!git_config_get_value("pull.rebase", &value))
 		return parse_config_rebase("pull.rebase", value, 1);
 
-	*rebase_unspecified = 1;
+	return REBASE_DEFAULT;
+}
 
-	return REBASE_FALSE;
+static enum pull_mode_type config_get_pull_mode(const char *repo)
+{
+	struct branch *curr_branch = branch_get("HEAD");
+	const char *value;
+
+	if (curr_branch) {
+		char *key = xstrfmt("branch.%s.pullmode", curr_branch->name);
+
+		if (!git_config_get_value(key, &value)) {
+			enum pull_mode_type ret = parse_config_pull_mode(key, value);
+			free(key);
+			return ret;
+		}
+
+		free(key);
+	}
+
+	if (!git_config_get_value("pull.mode", &value))
+		return parse_config_pull_mode("pull.mode", value);
+
+	return PULL_MODE_DEFAULT;
 }
 
 /**
@@ -446,7 +498,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
 
 	if (*refspecs) {
-		if (opt_rebase)
+		if (opt_rebase >= REBASE_TRUE)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
 		else
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
@@ -459,7 +511,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 			repo);
 	} else if (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		if (opt_rebase >= REBASE_TRUE)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
 		else
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
@@ -474,7 +526,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		if (opt_rebase >= REBASE_TRUE)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
 		else
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
@@ -960,32 +1012,17 @@ static int already_up_to_date(struct object_id *orig_head,
 	return 1;
 }
 
-static void show_advice_pull_non_ff(void)
-{
-	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
-		 "You can do so by running one of the following commands sometime before\n"
-		 "your next pull:\n"
-		 "\n"
-		 "  git config pull.rebase false  # merge\n"
-		 "  git config pull.rebase true   # rebase\n"
-		 "  git config pull.ff only       # fast-forward only\n"
-		 "\n"
-		 "You can replace \"git config\" with \"git config --global\" to set a default\n"
-		 "preference for all repositories. You can also pass --rebase, --no-rebase,\n"
-		 "or --ff-only on the command line to override the configured default per\n"
-		 "invocation.\n"));
-}
-
 int cmd_pull(int argc, const char **argv, const char *prefix)
 {
 	const char *repo, **refspecs;
 	struct oid_array merge_heads = OID_ARRAY_INIT;
 	struct object_id orig_head, curr_head;
 	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
 	int can_ff;
-	int divergent;
 	int ret;
+
+	opt_ff = xstrdup_or_null(config_get_ff());
+	opt_rebase = config_get_rebase();
 
 	if (!getenv("GIT_REFLOG_ACTION"))
 		set_reflog_message(argc, argv);
@@ -1010,25 +1047,31 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
-		opt_ff = xstrdup_or_null(config_get_ff());
-		/*
-		 * A subtle point: opt_ff was set on the line above via
-		 * reading from config.  opt_rebase, in contrast, is set
-		 * before this point via command line options.  The setting
-		 * of opt_rebase via reading from config (using
-		 * config_get_rebase()) does not happen until later.  We
-		 * are relying on the next if-condition happening before
-		 * the config_get_rebase() call so that an explicit
-		 * "--rebase" can override a config setting of
-		 * pull.ff=only.
-		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only"))
-			opt_ff = "--ff";
-	}
+	/*
+	 * If the user has not specified --merge or --rebase, fetch pull.mode to override
+	 * pull.rename.
+	 */
+	if (!mode) {
+		mode = config_get_pull_mode(repo);
 
-	if (opt_rebase < 0)
-		opt_rebase = config_get_rebase(&rebase_unspecified);
+		switch (mode) {
+		case PULL_MODE_MERGE:
+		case PULL_MODE_FAST_FORWARD:
+			opt_rebase = REBASE_FALSE;
+			break;
+		case PULL_MODE_REBASE:
+			/* Do not oeverride other rebase modes */
+			if (opt_rebase < REBASE_TRUE)
+				opt_rebase = REBASE_TRUE;
+			break;
+		case PULL_MODE_DEFAULT:
+			if (opt_rebase > 0)
+				mode = opt_rebase >= REBASE_TRUE ? PULL_MODE_REBASE : PULL_MODE_MERGE;
+			break;
+		default:
+			break;
+		}
+	}
 
 	if (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("pull");
@@ -1039,7 +1082,7 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 	if (get_oid("HEAD", &orig_head))
 		oidclr(&orig_head);
 
-	if (opt_rebase) {
+	if (opt_rebase >= REBASE_TRUE) {
 		if (opt_autostash == -1)
 			opt_autostash = config_autostash;
 
@@ -1100,28 +1143,19 @@ int cmd_pull(int argc, const char **argv, const char *prefix)
 		goto cleanup;
 	}
 	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+		if (opt_rebase >= REBASE_TRUE)
 			die(_("Cannot rebase onto multiple branches."));
 		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
 	can_ff = get_can_ff(&orig_head, &merge_heads);
-	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
-	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
-			die_ff_impossible();
-		opt_rebase = REBASE_FALSE;
-	}
-	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
-		show_advice_pull_non_ff();
-		die(_("Need to specify how to reconcile divergent branches."));
-	}
+	if ((!mode || mode == PULL_MODE_FAST_FORWARD) && !can_ff &&
+		!already_up_to_date(&orig_head, &merge_heads))
+		die_ff_impossible();
 
-	if (opt_rebase) {
+	if (opt_rebase >= REBASE_TRUE) {
 		struct object_id newbase;
 		struct object_id upstream;
 		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
