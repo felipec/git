@@ -132,10 +132,10 @@ test_expect_success 'push from/to new branch with non-defaulted remote fails wit
 	test_push_failure current
 '
 
-test_expect_success 'push from/to new branch fails with upstream and simple ' '
+test_expect_success 'push from/to new branch fails with upstream' '
 	git checkout -b new-branch-1 &&
 	test_config branch.new-branch-1.remote parent1 &&
-	test_push_failure simple &&
+	test_push_success simple new-branch-1 &&
 	test_push_failure upstream
 '
 
@@ -201,7 +201,7 @@ test_expect_success 'push from/to new branch with current creates remote branch'
 test_expect_success 'push to existing branch, with no upstream configured' '
 	test_config branch.main.remote repo1 &&
 	git checkout main &&
-	test_push_failure simple &&
+	test_push_success simple main &&
 	test_push_failure upstream
 '
 
