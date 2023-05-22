@@ -1,74 +1,127 @@
-[![Build status](https://github.com/git/git/workflows/CI/badge.svg)](https://github.com/git/git/actions?query=branch%3Amaster+event%3Apush)
+# git-fc
 
-Git - fast, scalable, distributed revision control system
-=========================================================
+git-fc is a fork of Junio Hamano's git.
 
-Git is a fast, scalable, distributed revision control system with an
-unusually rich command set that provides both high-level operations
-and full access to internals.
+git-fc doesn't include experimental code, or half-assed features, so you can
+expect the same level of stability as Junio's git. Also, it doesn't remove any
+feature, or do any backwards incompatible changes, so you can replace `git` with
+`git-fc` and you wouldn't notice any missing feature, only extra features.
 
-Git is an Open Source project covered by the GNU General Public
-License version 2 (some parts of it are under different licenses,
-compatible with the GPLv2). It was originally written by Linus
-Torvalds with help of a group of hackers around the net.
+## Extra features
 
-Please read the file [INSTALL][] for installation instructions.
+### New 'git stage' command
 
-Many Git online resources are accessible from <https://git-scm.com/>
-including full documentation and Git related tools.
+Absolutely everyone in the Git community has agreed that the term "the index"
+does not help people understand what it is and how it is used. Everyone except
+Junio Hamano.
 
-See [Documentation/gittutorial.txt][] to get started, then see
-[Documentation/giteveryday.txt][] for a useful minimum set of commands, and
-`Documentation/git-<commandname>.txt` for documentation of each command.
-If git has been correctly installed, then the tutorial can also be
-read with `man gittutorial` or `git help tutorial`, and the
-documentation of each command with `man git-<commandname>` or `git help
-<commandname>`.
+This is particularly true of newcomers, which is why everyone that teaches git
+uses the term "staging area", and that includes tutorials, and even the Pro Git
+book.
 
-CVS users may also want to read [Documentation/gitcvs-migration.txt][]
-(`man gitcvs-migration` or `git help cvs-migration` if git is
-installed).
+There is absolutely no reason not to use the term "staging area".
 
-The user discussion and development of Git take place on the Git
-mailing list -- everyone is welcome to post bug reports, feature
-requests, comments and patches to git@vger.kernel.org (read
-[Documentation/SubmittingPatches][] for instructions on patch submission
-and [Documentation/CodingGuidelines][]).
+As a first step a new command is introduced: `git stage`.
 
-Those wishing to help with error message, usage and informational message
-string translations (localization l10) should see [po/README.md][]
-(a `po` file is a Portable Object file that holds the translations).
+Junio's git already has a `git stage` command, but it's just an alias for `git
+add`.
 
-To subscribe to the list, send an email with just "subscribe git" in
-the body to majordomo@vger.kernel.org (not the Git list). The mailing
-list archives are available at <https://lore.kernel.org/git/>,
-<http://marc.info/?l=git> and other archival sites.
+The new command adds new options, for example:
 
-Issues which are security relevant should be disclosed privately to
-the Git Security mailing list <git-security@googlegroups.com>.
+ * `git stage --remove`
+ * `git stage --diff`
+ * `git stage --edit`
 
-The maintainer frequently sends the "What's cooking" reports that
-list the current status of various development topics to the mailing
-list.  The discussion following them give a good reference for
-project status, development direction and remaining tasks.
+`git stage --remove` is essentially the same as `git reset --mixed`,
+`git stage --diff` is the same as `git diff --cached`, but `git stage --edit` is
+something that cannot be achieved in Junio's git: allows you to edit the patch
+directly.
 
-The name "git" was given by Linus Torvalds when he wrote the very
-first version. He described the tool as "the stupid content tracker"
-and the name as (depending on your mood):
+Additionally, a new `git unstage` command is introduced, again: the same as
+`git reset --mixed`.
 
- - random three-letter combination that is pronounceable, and not
-   actually used by any common UNIX command.  The fact that it is a
-   mispronunciation of "get" may or may not be relevant.
- - stupid. contemptible and despicable. simple. Take your pick from the
-   dictionary of slang.
- - "global information tracker": you're in a good mood, and it actually
-   works for you. Angels sing, and a light suddenly fills the room.
- - "goddamn idiotic truckload of sh*t": when it breaks
+Blog post: [The git staging area, the term literally everyone agrees with](https://felipec.wordpress.com/2021/08/10/git-staging-area-rename/).
 
-[INSTALL]: INSTALL
-[Documentation/gittutorial.txt]: Documentation/gittutorial.txt
-[Documentation/giteveryday.txt]: Documentation/giteveryday.txt
-[Documentation/gitcvs-migration.txt]: Documentation/gitcvs-migration.txt
-[Documentation/SubmittingPatches]: Documentation/SubmittingPatches
-[Documentation/CodingGuidelines]: Documentation/CodingGuidelines
-[po/README.md]: po/README.md
+### New 'git update' command
+
+Everybody has agreed the `git pull` command is broken for most use-cases, which
+is why most seasoned git users avoid it, and it is recommended that new users
+avoid it as well.
+
+A new command is necessary for the most common use case, which is to fetch all
+the updates and advance the current branch if possible.
+
+The new `git update` will fast-forward to the latest commit in the remote
+branch if there's no divergence (you haven't made extra commits). But if you
+have made extra commits you will be told to do either merge or rebase. This is
+the behavior everyone has agreed is the best.
+
+This ensures that new users won't be making merges by mistake.
+
+Additionally, when doing a merge the order of the parents is reversed, so the
+local branch is merged to the remote one, and not the other way around like
+`git pull` does. Again: everyone has agreed this is serious a problem with
+`git pull` that has no solution except avoiding this command.
+
+Blog post: [git update: the odyssey for a sensible git pull](https://felipec.wordpress.com/2021/07/05/git-update/).
+
+### Publish tracking branch
+
+Junio's git doesn't have the greatest support for triangular workflows. A good
+solution for that is to introduce a second "upstream" tracking branch which is
+for the reverse: the branch you normally push to.
+
+Say you clone a repository `libgit2` in GitHub, then create a branch
+`feature-a` and push it to your personal repository. You would want to track
+two branches: `origin/master` and `mine/feature-a`, but Junio's git only
+provides support for a **single** upstream tracking branch.
+
+If you setup your upstream tracking branch to `origin/master`, then you can
+just do `git rebase` without arguments and git will pick the right branch
+(`origin/master`) to rebase to. However, `git push` by default will also try to
+push to 'origin/master', which is not what you want. Plus `git branch -v` will
+show how ahead/behind your branch is compared to `origin/master`, not
+`mine/feature-a`.
+
+If you set up your upstream to `mine/feature-a`, then `git push` will work, but
+`git rebase` won't.
+
+With this new publish feature, `git rebase` uses the _upstream_ branch, and
+`git push` uses the _publish_ branch.
+
+Setting the upstream tracking branch is easy:
+
+    git push --set-publish mine feature-a
+
+Or:
+
+    git branch --set-publish mine/feature-a
+
+And `git branch -v` will show it as well:
+
+```
+  branch/fast      ... [master, gh/branch/fast] ...
+  stage            ... [master, gh/stage] ...
+  transport/improv ... [master, gh/transport/improv] ...
+```
+
+Another advantage of this asymmetry is that `git branch -vv` can show separate
+ahead and behind markers, for example behind master (`master<`) and ahead of
+mine/feature-a (`mine/feature-a>`).
+
+This is how triangular workflow support should be implemented.
+
+## Other
+
+There's many other improvements that have been accumulating through the years:
+
+ * `fetch.default=sane` fetches a proper default instead of '.'
+ * `push.default=simple` is fixed
+ * shell completions are much improved
+
+There's many more improvements pending that I implemented in the past, but
+haven't had the time to properly port them.
+
+## Contributions
+
+Contributions are welcome on the mailing list git-fc@googlegroups.com.
