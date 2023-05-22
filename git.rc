@@ -6,11 +6,11 @@ BEGIN
   BEGIN
     BLOCK "040904b0"   /* LANG_ENGLISH/SUBLANG_ENGLISH_US, Unicode CP */
     BEGIN
-      VALUE "CompanyName", "The Git Development Community\0"
-      VALUE "FileDescription", "Git for Windows\0"
+      VALUE "CompanyName", "git-fc community\0"
+      VALUE "FileDescription", "git-fc\0"
       VALUE "InternalName", "git\0"
       VALUE "OriginalFilename", "git.exe\0"
-      VALUE "ProductName", "Git\0"
+      VALUE "ProductName", "git-fc\0"
       VALUE "ProductVersion", GIT_VERSION "\0"
     END
   END

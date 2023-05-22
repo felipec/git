@@ -733,7 +733,7 @@ void get_version_info(struct strbuf *buf, int show_build_options)
 	 *
 	 * Always show the version, even if other options are given.
 	 */
-	strbuf_addf(buf, "git version %s\n", git_version_string);
+	strbuf_addf(buf, "git-fc version %s\n", git_version_string);
 
 	if (show_build_options) {
 		strbuf_addf(buf, "cpu: %s\n", GIT_HOST_CPU);
