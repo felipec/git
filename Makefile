@@ -2217,6 +2217,7 @@ bindir_relative_SQ = $(subst ','\'',$(bindir_relative))
 mandir_SQ = $(subst ','\'',$(mandir))
 mandir_relative_SQ = $(subst ','\'',$(mandir_relative))
 infodir_relative_SQ = $(subst ','\'',$(infodir_relative))
+sharedir_SQ = $(subst ','\'',$(sharedir))
 perllibdir_SQ = $(subst ','\'',$(perllibdir))
 localedir_SQ = $(subst ','\'',$(localedir))
 localedir_relative_SQ = $(subst ','\'',$(localedir_relative))
@@ -3554,6 +3555,9 @@ quick-install-man:
 
 quick-install-html:
 	$(MAKE) -C Documentation quick-install-html
+
+install-share:
+	$(INSTALL) -D -m 644 share/completion/extra.bash '$(DESTDIR_SQ)$(sharedir_SQ)'/git/completion/extra.bash
 
 
 
