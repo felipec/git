@@ -232,11 +232,7 @@ ubuntu-*)
 		break
 	fi
 
-	PYTHON_PACKAGE=python2
-	if test "$jobname" = linux-gcc
-	then
-		PYTHON_PACKAGE=python3
-	fi
+	PYTHON_PACKAGE=python3
 	MAKEFLAGS="$MAKEFLAGS PYTHON_PATH=/usr/bin/$PYTHON_PACKAGE"
 
 	export GIT_TEST_HTTPD=true
