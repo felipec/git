@@ -1611,7 +1611,7 @@ else
 	ifndef CURL_CFLAGS
 		CURL_CFLAGS = $(eval CURL_CFLAGS := $$(shell $$(CURL_CONFIG) --cflags))$(CURL_CFLAGS)
 	endif
-	BASIC_CFLAGS += $(CURL_CFLAGS)
+	BASIC_CFLAGS += $(CURL_CFLAGS) -DCURL_DISABLE_TYPECHECK
 
 	REMOTE_CURL_PRIMARY = git-remote-http$X
 	REMOTE_CURL_ALIASES = git-remote-https$X git-remote-ftp$X git-remote-ftps$X
