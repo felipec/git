@@ -86,7 +86,7 @@ static LIST_HEAD(done_head);
 static size_t base_cache_used;
 static size_t base_cache_limit;
 
-struct thread_local {
+struct thread_data {
 	pthread_t thread;
 	int pack_fd;
 };
@@ -109,7 +109,7 @@ static struct object_entry *objects;
 static struct object_stat *obj_stat;
 static struct ofs_delta_entry *ofs_deltas;
 static struct ref_delta_entry *ref_deltas;
-static struct thread_local nothread_data;
+static struct thread_data nothread_data;
 static int nr_objects;
 static int nr_ofs_deltas;
 static int nr_ref_deltas;
@@ -140,7 +140,7 @@ static uint32_t input_crc32;
 static int input_fd, output_fd;
 static const char *curr_pack;
 
-static struct thread_local *thread_data;
+static struct thread_data *thread_data;
 static int nr_dispatched;
 static int threads_active;
 
@@ -381,7 +381,7 @@ static NORETURN void bad_object(off_t offset, const char *format, ...)
 	    (uintmax_t)offset, buf);
 }
 
-static inline struct thread_local *get_thread_data(void)
+static inline struct thread_data *get_thread_data(void)
 {
 	if (HAVE_THREADS) {
 		if (threads_active)
@@ -392,7 +392,7 @@ static inline struct thread_local *get_thread_data(void)
 	return &nothread_data;
 }
 
-static void set_thread_data(struct thread_local *data)
+static void set_thread_data(struct thread_data *data)
 {
 	if (threads_active)
 		pthread_setspecific(key, data);
